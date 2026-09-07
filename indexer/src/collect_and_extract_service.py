@@ -101,7 +101,7 @@ def _extract_keywords(data: dict, article_id: int) -> tuple[list[str], dict[str,
         visited.add(id(cat))
         name = cat.get("name")
         if isinstance(name, str) and (n := name.strip()):
-            # if n.lower() != "bÃ¼rgerservice":
+            # if n.lower() != "bürgerservice":
             # every article has this category but for completeness and
             # possible extension with other articles we keep it
             categories.append(n.lower())

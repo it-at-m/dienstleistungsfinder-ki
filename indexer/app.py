@@ -90,7 +90,7 @@ def build_collection_documents() -> dict[str, list[Document]]:
     for key in _configured_collection_keys():
         builder = _COLLECTION_BUILDERS.get(key)
         if builder is None:
-            logger.warning("No collection builder registered for key '%s' â€“ skipping", key)
+            logger.warning("No collection builder registered for key '%s' – skipping", key)
             continue
 
         logger.info("Building documents for collection key '%s'", key)

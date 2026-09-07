@@ -1,7 +1,7 @@
 [project]
 name = "dlf-backend"
 version = "0.1.0"
-description = "KI Suche der stadt MÃ¼nchen"
+description = "KI-Suche der Stadt München (Backend)"
 readme = "README.md"
 authors = [
     { name = "Fabian Reinold", email = "fabian.reinold@muenchen.de" },

@@ -1,7 +1,7 @@
 [project]
 name = "dlf-indexer"
 version = "0.1.0"
-description = "Indexer zwischen stadt.muenchen.de-CMS und DLF-VektorDB"
+description = "Indexer zwischen stadt.muenchen.de-CMS und DLF-Vektordatenbank"
 readme = "README.md"
 requires-python = "==3.13.11"
 authors = [
