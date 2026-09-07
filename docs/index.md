@@ -2,9 +2,12 @@
 layout: home
 
 hero:
-  name: "Dienstleistungsfinder KI"
+  name: "DLF-KI"
   text: "Technical documentation"
   tagline: Retrieval-augmented search for trustworthy information about municipal services.
+  image:
+    src: ./graphics/dlf_logo.png
+    alt: DLF Logo
   actions:
     - theme: brand
       text: Understand the architecture
