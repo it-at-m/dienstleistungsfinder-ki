@@ -32,7 +32,7 @@ The monorepo publishes three independently versioned applications:
 | ----------- | ---------- | ----------------------------------------------------------------------------------------- |
 | Core        | `core/`    | Vue web component, FastAPI API, retrieval and answer chains, and static-file serving      |
 | Indexer     | `indexer/` | Collection, normalization, embedding, Qdrant indexing, and optional popularity enrichment |
-| MCP server  | `mcp/`     | MCP tool that exposes Core retrieval to agents over Streamable HTTP or stdio               |
+| MCP server  | `mcp/`     | MCP tool that exposes Core retrieval to agents over Streamable HTTP or stdio              |
 
 Qdrant is the shared boundary between the indexer and Core. The indexer writes collections; Core reads them. The MCP server calls Core and does not access Qdrant directly. This separation allows indexing to run as a scheduled job without coupling it to user-facing request traffic.
 

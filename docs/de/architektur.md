@@ -8,7 +8,7 @@ Das System ist in einen asynchronen Schreibpfad und einen nutzerseitigen Lesepfa
 | --------------- | -------------------- | --------------------------------- | ------------------------------------------- |
 | Suchoberfläche  | Vue 3 Custom Element | Statische Browserdateien          | Core-HTTP-API                               |
 | Core-API        | FastAPI, LangChain   | Dauerhafter Dienst auf Port 8080  | Qdrant, OpenAI-kompatible API, Langfuse     |
-| MCP-Server      | MCP Python SDK       | Dauerhafter Dienst auf Port 8080  | Core-Retrieval-API                           |
+| MCP-Server      | MCP Python SDK       | Dauerhafter Dienst auf Port 8080  | Core-Retrieval-API                          |
 | Indexer         | Python, LangChain    | Bedarfs- oder zeitgesteuerter Job | Inhalts-APIs, Qdrant, OpenAI-kompatible API |
 | Vektordatenbank | Qdrant               | Dauerhafter Dienst auf Port 6333  | Persistentes Volume                         |
 
