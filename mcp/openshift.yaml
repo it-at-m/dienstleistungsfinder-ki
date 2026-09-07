@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dlf-mcp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dlf-mcp
+  template:
+    metadata:
+      labels:
+        app: dlf-mcp
+    spec:
+      containers:
+        - name: mcp
+          image: ghcr.io/it-at-m/dienstleistungsfinder-ki-mcp:latest
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: DLF_RETRIEVAL_URL
+              value: http://dlf-core:8080/api/retrieval
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+            seccompProfile:
+              type: RuntimeDefault
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dlf-mcp
+spec:
+  selector:
+    app: dlf-mcp
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
