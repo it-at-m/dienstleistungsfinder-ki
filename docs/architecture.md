@@ -8,6 +8,7 @@ The system is split into an offline write path and an online read path. Both use
 | --------------- | -------------------- | --------------------------------- | ------------------------------------------- |
 | Search UI       | Vue 3 custom element | Static browser assets             | Core HTTP API                               |
 | Core API        | FastAPI, LangChain   | Long-running service on port 8080 | Qdrant, OpenAI-compatible API, Langfuse     |
+| MCP server      | MCP Python SDK       | Long-running service on port 8080 | Core retrieval API                          |
 | Indexer         | Python, LangChain    | On-demand or scheduled job        | Content APIs, Qdrant, OpenAI-compatible API |
 | Vector database | Qdrant               | Long-running service on port 6333 | Persistent volume                           |
 
@@ -22,7 +23,11 @@ Browser ──► Vue web component ──► FastAPI ──► hybrid retrieval
                                   │
                                   ├──► OpenAI-compatible models
                                   └──► Langfuse traces and feedback
+
+MCP client ──► MCP server ──► FastAPI retrieval API ────────────────┘
 ```
+
+The MCP server is a thin agent-facing adapter. It exposes one read-only retrieval tool and delegates searching to the Core API; it does not connect to Qdrant or model providers directly.
 
 The `service` collection contains structured public-service articles. The `info` collection contains Magnolia information pages. `VDB_COLLECTIONS` controls which builders run in the indexer and which collections the backend opens.
 

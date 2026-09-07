@@ -26,14 +26,15 @@ features:
 
 Dienstleistungsfinder KI ist eine Retrieval-Augmented-Generation-Anwendung (RAG) für Informationen zu öffentlichen Dienstleistungen. Sie sammelt offizielle Inhalte, wandelt sie in durchsuchbare Dokumente um, speichert dichte und dünnbesetzte Vektoren in Qdrant, ermittelt passende Dokumente zu einer natürlichsprachlichen Frage und kann eine Antwort erzeugen, die sich auf eine ausgewählte Quelle stützt.
 
-Das Monorepository veröffentlicht zwei unabhängig versionierte Anwendungen:
+Das Monorepository veröffentlicht drei unabhängig versionierte Anwendungen:
 
 | Anwendung | Verzeichnis | Aufgabe                                                                                                  |
 | --------- | ----------- | -------------------------------------------------------------------------------------------------------- |
 | Core      | `core/`     | Vue Web Component, FastAPI-API, Retrieval- und Antwortketten sowie Auslieferung statischer Dateien       |
 | Indexer   | `indexer/`  | Sammlung, Normalisierung, Embedding, Qdrant-Indizierung und optionale Anreicherung mit Popularitätsdaten |
+| MCP-Server | `mcp/`     | MCP-Tool, das die Core-Suche über Streamable HTTP oder stdio für Agenten bereitstellt                    |
 
-Qdrant bildet die gemeinsame Schnittstelle: Der Indexer schreibt Collections, der Core liest sie. Dadurch kann die Indizierung als geplanter Job laufen, ohne an den nutzerseitigen Anfrageverkehr gekoppelt zu sein.
+Qdrant bildet die gemeinsame Schnittstelle zwischen Indexer und Core: Der Indexer schreibt Collections, der Core liest sie. Der MCP-Server ruft den Core auf und greift nicht direkt auf Qdrant zu. Dadurch kann die Indizierung als geplanter Job laufen, ohne an den nutzerseitigen Anfrageverkehr gekoppelt zu sein.
 
 ## Anfrage von Anfang bis Ende
 
@@ -52,6 +53,7 @@ Qdrant bildet die gemeinsame Schnittstelle: Der Indexer schreibt Collections, de
 - [Lokale Entwicklung](./lokale-entwicklung) beschreibt Voraussetzungen, Konfiguration, Start und Prüfungen.
 - [Indizierungspipeline](./indexing-pipeline) verfolgt Inhalte von den Quellsystemen bis Qdrant.
 - [Suche und API](./suche-api) dokumentiert Laufzeitketten, Endpunkte, Anfragefluss und Fehler.
+- [MCP-Server](./mcp-server) beschreibt Agentenanbindung, Konfiguration, Transportsicherheit und Bereitstellung.
 - [Frontend und Bereitstellung](./frontend-bereitstellung) behandelt Web Component, Container-Build, CI und Releases.
 
 ::: tip Geltungsbereich

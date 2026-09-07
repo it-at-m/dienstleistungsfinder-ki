@@ -1,5 +1,7 @@
 import json
 import logging
+import platform
+from importlib.metadata import version
 from urllib.parse import urlsplit, urlunsplit
 
 from src.config.settings import McpSettings
@@ -7,7 +9,8 @@ from src.server import create_server
 
 LOGGER = logging.getLogger("dlf_search_mcp")
 SERVER_NAME = "dlf-search-mcp"
-SERVER_VERSION = "0.1.0"
+SERVER_VERSION = version(SERVER_NAME)
+MCP_SDK_VERSION = version("mcp")
 MCP_PATH = "/mcp"
 
 
@@ -25,7 +28,14 @@ def _safe_url(value: object) -> str:
 
 def log_startup_configuration(settings: McpSettings) -> None:
     security_mode = "configured allowlist" if settings.allowed_hosts is not None else "MCP SDK defaults"
-    LOGGER.info("Starting %s version=%s", SERVER_NAME, SERVER_VERSION)
+    LOGGER.info(
+        "Starting %s version=%s python=%s mcp_sdk=%s log_level=%s",
+        SERVER_NAME,
+        SERVER_VERSION,
+        platform.python_version(),
+        MCP_SDK_VERSION,
+        settings.log_level,
+    )
     LOGGER.info(
         "Transport configuration transport=%s host=%s port=%s path=%s stateless_http=true json_response=true",
         settings.transport,
@@ -60,20 +70,24 @@ def main() -> None:
     )
     log_startup_configuration(settings)
     server = create_server(settings)
-    if settings.transport == "stdio":
-        LOGGER.info("MCP server ready on stdio")
-        server.run(transport="stdio")
-    else:
-        LOGGER.info("MCP server listening at http://%s:%s%s", settings.host, settings.port, MCP_PATH)
-        server.run(
-            transport="streamable-http",
-            host=settings.host,
-            port=settings.port,
-            streamable_http_path=MCP_PATH,
-            stateless_http=True,
-            json_response=True,
-            transport_security=settings.transport_security,
-        )
+    try:
+        if settings.transport == "stdio":
+            LOGGER.info("Starting MCP stdio transport")
+            server.run(transport="stdio")
+        else:
+            LOGGER.info("Starting MCP HTTP transport endpoint=http://%s:%s%s", settings.host, settings.port, MCP_PATH)
+            server.run(
+                transport="streamable-http",
+                host=settings.host,
+                port=settings.port,
+                streamable_http_path=MCP_PATH,
+                stateless_http=True,
+                json_response=True,
+                transport_security=settings.transport_security,
+            )
+    except Exception:
+        LOGGER.exception("MCP server stopped because of an unexpected error")
+        raise
 
 
 if __name__ == "__main__":

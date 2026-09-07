@@ -24,7 +24,11 @@ def test_startup_logging_reports_effective_configuration(caplog):
         log_startup_configuration(settings)
 
     messages = [record.getMessage() for record in caplog.records]
-    assert "Starting dlf-search-mcp version=0.1.0" in messages
+    assert any(
+        message.startswith("Starting dlf-search-mcp version=0.1.0 python=")
+        and "mcp_sdk=2.1.1 log_level=INFO" in message
+        for message in messages
+    )
     assert any("host=0.0.0.0 port=8080 path=/mcp" in message for message in messages)
     assert any('allowed_hosts=["localhost:*", "mcp.example"]' in message for message in messages)
     assert any('allowed_origins=["https://client.example"]' in message for message in messages)
