@@ -117,10 +117,7 @@ def transform(detailed_articles: list[DetailedArticle]) -> list[TransformedArtic
                     service_url = (
                         [field.values[i].uri for i in range(len(field.values))] if len(field.values) > 0 else [""]
                     )
-                    online_service_md = [
-                        f'[{service_name[i]}]({service_url[i]})'
-                        for i in range(len(service_name))
-                    ]
+                    online_service_md = [f"[{service_name[i]}]({service_url[i]})" for i in range(len(service_name))]
                     online_services.extend(online_service_md)
 
                 elif isinstance(field, TextValueField):

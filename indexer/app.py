@@ -38,12 +38,12 @@ def _build_service_documents() -> tuple[str, list[Document]]:
     if not detailed_articles:
         logger.error("No detailed articles for info db found. Script aborting.")
         exit(-1)
-    if getenv('SAVE_ARTICLES', False):
-        with open("artifacts/articles.jsonl", mode='w', encoding="utf-8") as fp:
+    if getenv("SAVE_ARTICLES", False):
+        with open("artifacts/articles.jsonl", mode="w", encoding="utf-8") as fp:
             print("saving articles!")
             for article in detailed_articles:
                 fp.write(article.model_dump_json())
-                fp.write('\n')
+                fp.write("\n")
 
     if len(detailed_articles) < MIN_ARTICLES:
         logger.error(
@@ -52,15 +52,16 @@ def _build_service_documents() -> tuple[str, list[Document]]:
             MIN_ARTICLES,
         )
         exit(-1)
-    
+
     transformed_articles = transform(detailed_articles)
     documents = [
-            Document(
-                page_content=article.page_content,
-                metadata=article.model_dump(exclude={"page_content"}),
-                id=str(uuid5(NAMESPACE_DLF, str(article.id))),
-            ) for article in transformed_articles
-        ]
+        Document(
+            page_content=article.page_content,
+            metadata=article.model_dump(exclude={"page_content"}),
+            id=str(uuid5(NAMESPACE_DLF, str(article.id))),
+        )
+        for article in transformed_articles
+    ]
     return "service", documents
 
 
@@ -136,5 +137,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-
-

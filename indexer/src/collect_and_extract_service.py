@@ -21,6 +21,7 @@ BASE_URL = "https://stadt.muenchen.de/service/rs/befi/services/{api_id}/descript
 _failed_attempts: list[dict[str, Any]] = []
 _keyword_mapping: dict[str, list[str]] | None = None
 
+
 def _load_api_ids(client: Client) -> set[int] | None:
     """Loads API IDs from the API.
 
@@ -271,5 +272,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-
