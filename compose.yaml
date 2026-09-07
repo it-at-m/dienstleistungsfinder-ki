@@ -27,8 +27,9 @@ services:
       - qdrant
     ports:
       - "8080:8080"
-    volumes:
-      - ~\LHM-CA-v2.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+    # Mount custom CA certificates here if your network intercepts TLS, e.g.:
+    # volumes:
+    #   - ~/LHM-CA-v2.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro
 
   indexer:
     profiles: [indexer]
@@ -47,8 +48,9 @@ services:
       no_proxy: qdrant,localhost,127.0.0.1,${no_proxy:-}
     depends_on:
       - qdrant
-    volumes:
-      - ~\LHM-CA-v2.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+    # Mount custom CA certificates here if your network intercepts TLS, e.g.:
+    # volumes:
+    #   - ~/LHM-CA-v2.pem:/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem:ro
 
 volumes:
   qdrant-data:
