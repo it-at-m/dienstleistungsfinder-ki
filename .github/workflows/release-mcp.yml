@@ -1,7 +1,7 @@
 name: Release MCP image
 on:
   push:
-    tags: ["mcp-v*.*.*"]
+    tags: ["mcp-v*.*.*", "mcp-test-*"]
   workflow_dispatch:
 permissions:
   contents: read

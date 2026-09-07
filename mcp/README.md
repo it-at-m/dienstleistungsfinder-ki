@@ -55,7 +55,24 @@ The **Release MCP image** GitHub Actions workflow builds and publishes to
 `ghcr.io/<repository-owner>/<repository-name>-mcp` (lowercase):
 
 - Push `mcp-v0.1.0` to publish `:0.1.0`, `:latest`, and `:sha-<commit>`.
+- Push an `mcp-test-*` tag from a feature branch to publish only `:sha-<commit>`.
 - Run the workflow manually to publish only `:sha-<commit>`.
+
+Until the workflow exists on the repository's default branch, GitHub does not
+show its manual **Run workflow** button. Trigger the same SHA-only build from a
+feature branch with a temporary tag instead:
+
+```bash
+git tag mcp-test-<name>
+git push origin mcp-test-<name>
+```
+
+After testing, delete the temporary tag locally and remotely:
+
+```bash
+git tag -d mcp-test-<name>
+git push origin --delete mcp-test-<name>
+```
 
 Both release and CI run lint and tests. CI also builds the image without publishing.
 To build locally from the repository root:
