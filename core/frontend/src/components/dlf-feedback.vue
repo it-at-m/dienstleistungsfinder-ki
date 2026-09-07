@@ -126,7 +126,7 @@ const openKIMuenchen = () => {
                 <template v-else-if="state == FeedbackState.POSITVE">
                   <p>
                     Schön, dass Ihnen unsere KI-Suche geholfen hat. Sie möchten
-                    uns noch etwas mitteilen? Wir freuen uns über ihr Feedback:
+                    uns noch etwas mitteilen? Wir freuen uns über Ihr Feedback:
                   </p>
                 </template>
                 <template v-else>
