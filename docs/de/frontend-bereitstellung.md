@@ -42,7 +42,6 @@ Die Komponente verwendet Shadow DOM über den Custom-Element-Build von Vue. Sie 
 | `npm run build`           | Produktives Web-Component-Bundle in `dist/`             |
 | `npm run buildlocal`      | Build und Kopie der Dateien nach `core/backend/static/` |
 | `npm run lint`            | ESLint- und Prettier-Prüfungen                          |
-| `npm run test:unit`       | Vitest-Testsuite                                        |
 
 Der Post-Build-Prozess erzeugt `loader.js` mit dem tatsächlichen gehashten JavaScript-Dateinamen. Einbettende Seiten müssen den Vite-Asset-Hash daher nicht kennen.
 

@@ -88,7 +88,6 @@ uv run pytest
 cd ../frontend
 npm ci
 npm run lint
-npm run test:unit
 npm run build
 
 cd ../../indexer
@@ -100,7 +99,7 @@ uv run pytest
 ## Work on these docs
 
 ```bash
-cd documentation
+cd docs
 npm install
 npm run docs:dev
 ```
