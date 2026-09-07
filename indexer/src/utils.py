@@ -125,13 +125,10 @@ def build_collection_content_hash_map(qdrant_client: QdrantClient, collection: s
 
         for point in points:
             payload: dict[str, Any] = point.payload or {}
-            point_id = point.id # same id that is created for each document, i.e. document.id == point.id
+            point_id = point.id  # same id that is created for each document, i.e. document.id == point.id
             content = payload.get("page_content")
             if point_id is not None and content is not None:
                 content_hash = _hash_content(_normalize_content(content))
                 content_hash_map[str(point_id)] = content_hash
 
     return content_hash_map
-
-
-

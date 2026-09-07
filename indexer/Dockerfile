@@ -30,8 +30,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 ARG IMAGE_CREATED="unknown"
 ARG IMAGE_REVISION="unknown"
 ARG IMAGE_VERSION="unknown"
-LABEL org.opencontainers.image.authors='Landeshauptstadt MÃ¼nchen <opensource@muenchen.de>' \
-    org.opencontainers.image.vendor='Landeshauptstadt MÃ¼nchen' \
+LABEL org.opencontainers.image.authors='Landeshauptstadt München <opensource@muenchen.de>' \
+    org.opencontainers.image.vendor='Landeshauptstadt München' \
     org.opencontainers.image.created="$IMAGE_CREATED" \
     org.opencontainers.image.revision="$IMAGE_REVISION" \
     org.opencontainers.image.version="$IMAGE_VERSION" \

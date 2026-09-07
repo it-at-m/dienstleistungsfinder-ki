@@ -53,7 +53,7 @@ def _fetch_articles(url: str | None = None, total: int = 10000) -> SearchRespons
                     article_batch = SearchResponse.model_validate(api_json)
                     # first batch returns the total amount of articles that can be retrieved via api
                     # default for total in searchresponse is 0
-                    if result.total == 0: 
+                    if result.total == 0:
                         result = article_batch
                     else:
                         result.results.extend(article_batch.results)
@@ -64,6 +64,7 @@ def _fetch_articles(url: str | None = None, total: int = 10000) -> SearchRespons
                 print(f"Error decoding JSON response: {e}")
 
     return result
+
 
 def _check_for_easy_language(urlTitle: str) -> bool:
     """Check if the article is in leichte sprache based on its urlTitle."""

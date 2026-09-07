@@ -21,6 +21,7 @@ BASE_URL = "https://stadt.muenchen.de/service/rs/befi/services/{api_id}/descript
 _failed_attempts: list[dict[str, Any]] = []
 _keyword_mapping: dict[str, list[str]] | None = None
 
+
 def _load_api_ids(client: Client) -> set[int] | None:
     """Loads API IDs from the API.
 
@@ -101,7 +102,7 @@ def _extract_keywords(data: dict, article_id: int) -> tuple[list[str], dict[str,
         visited.add(id(cat))
         name = cat.get("name")
         if isinstance(name, str) and (n := name.strip()):
-            # if n.lower() != "bÃ¼rgerservice":
+            # if n.lower() != "bürgerservice":
             # every article has this category but for completeness and
             # possible extension with other articles we keep it
             categories.append(n.lower())
@@ -271,5 +272,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-

@@ -391,7 +391,7 @@ const scoreResult = (value: boolean) => {
                   >
                   <template #content>
                     <p>
-                      Entschuldigung. Für ihre Frage konnte unsere Künstliche
+                      Entschuldigung. Für Ihre Frage konnte unsere Künstliche
                       Intelligenz leider kein passendes Ergebnis finden.
                       Vielleicht versuchen Sie es noch einmal mit einer anderen
                       Frage?

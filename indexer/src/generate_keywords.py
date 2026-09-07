@@ -76,7 +76,7 @@ def generate_article_keywords(
                 "allowed_categories": allowed_str,
                 "n": n,
             }
-        ) # type: ignore
+        )  # type: ignore
     except Exception as e:
         logger.error(f"Error occurred while classifying article categories: {e}")
         result = KeywordResult(keywords=[])

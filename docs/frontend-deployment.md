@@ -42,7 +42,6 @@ The component uses Shadow DOM through Vue's custom-element build. It imports the
 | `npm run build`            | Production web-component bundle in `dist/`           |
 | `npm run buildlocal`       | Builds and copies assets into `core/backend/static/` |
 | `npm run lint`             | ESLint and Prettier checks                           |
-| `npm run test:unit`        | Vitest suite                                         |
 
 The post-build process generates `loader.js` with the actual hashed JavaScript filename, so embedding pages do not need to know Vite's asset hash.
 

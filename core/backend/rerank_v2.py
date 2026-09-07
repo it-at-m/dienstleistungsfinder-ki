@@ -135,10 +135,7 @@ class Reranker:
         # Extract visits aligned with response.results ordering
         site_stats_key, visits_key = self.popularity_field_path
         visits = np.array(
-            [
-                _none_to_num(candidates[i].metadata.get(site_stats_key, {}).get(visits_key, 0))
-                for i in idxs
-            ],
+            [_none_to_num(candidates[i].metadata.get(site_stats_key, {}).get(visits_key, 0)) for i in idxs],
             dtype=np.float64,
         )
         np.nan_to_num(visits, copy=False)
