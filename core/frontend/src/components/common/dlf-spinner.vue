@@ -91,12 +91,12 @@ import type { ComputedRef } from "vue";
 
 import { computed } from "vue";
 
-const { size = "300", percentage } = defineProps<{
+const { size = "300", percentage = 0 } = defineProps<{
   /**
    * Size of the spinner relative or absolute.
    * Typical units for styling size are allowed.
    */
-  size: string;
+  size?: string;
   /**
    * Number that represents the progress.
    * Numbers lower than 0 result in '0%'.

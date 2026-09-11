@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/* eslint-disable vue/no-v-html */
 import type DLFAnswer from "@/types/DLFAnswer";
 
 import { MucCallout } from "@muenchen/muc-patternlab-vue";
@@ -286,8 +287,18 @@ const scoreResult = (value: boolean) => {
   />
   <main>
     <div>
+      <!--
+          Icon sprites are static, trusted HTML fragments.
+          eslint-disable-next-line vue/no-v-html
+        -->
       <div v-html="mucIconsSprite" />
+      <!--
+          eslint-disable-next-line vue/no-v-html
+        -->
       <div v-html="customIconsSprite" />
+      <!--
+          eslint-disable-next-line vue/no-v-html
+        -->
       <div v-html="dlfIconsSprite" />
 
       <dlf-intro labelfor="dlf-searchbar">

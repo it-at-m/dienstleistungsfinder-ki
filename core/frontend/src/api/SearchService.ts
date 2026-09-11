@@ -141,7 +141,6 @@ export default class SearchService {
     keywords?: string[],
     categories?: string[]
   ): Promise<void> {
-    let retrievalInput: RetrievalInput;
     const textQuery = (query ?? "").trim();
     const hasTextQuery = textQuery.length > 0;
     const hasKeywords = !!(keywords && keywords.length > 0);
@@ -154,7 +153,7 @@ export default class SearchService {
       fallbackTerms.push(...categories);
     }
     const effectiveQuery = hasTextQuery ? textQuery : fallbackTerms.join(" ");
-    retrievalInput = SearchService.buildRetrievalInput(effectiveQuery, {
+    const retrievalInput = SearchService.buildRetrievalInput(effectiveQuery, {
       keywords: hasKeywords ? keywords : undefined,
       categories: hasCategories ? categories : undefined,
     });
