@@ -73,4 +73,4 @@ The session cookie groups browser activity; `run_id` correlates retrieval, answe
 
 ## MCP exposure
 
-`core/backend/app.py` configures MCP exposure through the `MCP_ENDPOINTS` method/path allowlist. Only `POST /api/retrieval` is enabled initially; a final exclusion rule prevents all other endpoints from becoming MCP tools or resources. Add an explicit entry to expose another endpoint. For answers grounded in retrieved text, explicitly request `result="full"`.
+`core/backend/settings.py` reads the `MCP_ENDPOINTS` environment setting as a JSON list of method/path objects, for example `[{"method":"POST","path":"/api/retrieval"}]`. Set it in `.env` or the container environment and restart Core. An empty list disables all MCP tools. Only `POST /api/retrieval` is enabled initially; a final exclusion rule prevents all other endpoints from becoming MCP tools or resources. Add an explicit entry to expose another endpoint. For answers grounded in retrieved text, explicitly request `result="full"`.

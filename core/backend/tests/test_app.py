@@ -2,6 +2,8 @@ import asyncio
 import os
 from contextlib import asynccontextmanager
 
+import pytest
+
 os.environ.setdefault("DLF_SESSION_SECRET", "test-session-secret")
 os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "test-public")
 os.environ.setdefault("LANGFUSE_SECRET_KEY", "test-secret")
@@ -14,6 +16,11 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 client = TestClient(backend)
+
+
+@pytest.fixture(autouse=True)
+def default_mcp_settings(monkeypatch):
+    monkeypatch.delenv("MCP_ENDPOINTS", raising=False)
 
 
 def test_combined_lifespan_starts_backend_before_mcp():
@@ -119,3 +126,31 @@ def test_scrubber_is_removed():
     assert "/api/scrub" not in schema["paths"]
     assert "ScrubInput" not in schema["components"]["schemas"]
     assert "scrubber_enabled" not in schema["components"]["schemas"]["FrontendConfig"]["properties"]
+
+
+def test_mcp_endpoints_can_be_configured(monkeypatch):
+    from app import create_mcp
+    from fastmcp import Client
+
+    monkeypatch.setenv("MCP_ENDPOINTS", '[{"method":"get","path":"/api/keywords"}]')
+
+    async def discover():
+        async with Client(create_mcp()) as mcp_client:
+            assert [tool.name for tool in await mcp_client.list_tools()] == ["get_available_keywords"]
+
+    asyncio.run(discover())
+
+
+def test_empty_mcp_endpoints_exposes_nothing(monkeypatch):
+    from app import create_mcp
+    from fastmcp import Client
+
+    monkeypatch.setenv("MCP_ENDPOINTS", "[]")
+
+    async def discover():
+        async with Client(create_mcp()) as mcp_client:
+            assert await mcp_client.list_tools() == []
+            assert await mcp_client.list_resources() == []
+            assert await mcp_client.list_resource_templates() == []
+
+    asyncio.run(discover())

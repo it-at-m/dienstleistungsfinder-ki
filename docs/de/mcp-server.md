@@ -36,13 +36,13 @@ Eine eigenständig verständliche `query` übergeben und für Antworten anhand d
 
 ## Freigabe konfigurieren
 
-`MCP_ENDPOINTS` in `core/backend/app.py` definiert die erlaubten HTTP-Methoden und Pfade:
+`MCP_ENDPOINTS` ist eine Umgebungseinstellung, die `core/backend/settings.py` einliest. In `core/backend/.env` oder der Container-Umgebung als JSON-Liste exakter Methoden-Pfad-Objekte setzen:
 
-```python
-MCP_ENDPOINTS = (("POST", "/api/retrieval"),)
+```dotenv
+MCP_ENDPOINTS='[{"method":"POST","path":"/api/retrieval"}]'
 ```
 
-Jeder Eintrag wird als FastMCP-Tool bereitgestellt. Eine abschließende Ausschlussregel verhindert die automatische Freigabe anderer Endpunkte als MCP-Tools oder Ressourcen. Für weitere Endpunkte explizite Methoden-Pfad-Paare ergänzen, Core neu bauen oder starten und die zwischengespeicherte Tool-Liste des Clients aktualisieren.
+Jeder Eintrag wird als FastMCP-Tool bereitgestellt. Eine abschließende Ausschlussregel verhindert die automatische Freigabe anderer Endpunkte als MCP-Tools oder Ressourcen. Weitere Endpunkte als Objekte ergänzen, beispielsweise `{"method":"GET","path":"/api/keywords"}`. Ohne Einstellung wird ausschließlich Retrieval freigegeben. `MCP_ENDPOINTS='[]'` gibt keine Tools oder Ressourcen frei. Ungültiges JSON, fehlerhafte Einträge und Operationen außerhalb des Backend-OpenAPI-Schemas verhindern den Start. Methoden sind unabhängig von Groß-/Kleinschreibung; Pfade werden exakt verglichen und sind keine regulären Ausdrücke. Nach einer Änderung Core neu starten und die zwischengespeicherte Tool-Liste des Clients aktualisieren. Ein Neubau ist für Konfigurationsänderungen nicht erforderlich.
 
 ## Bereitstellung
 

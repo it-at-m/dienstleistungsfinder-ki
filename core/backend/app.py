@@ -15,9 +15,7 @@ from backend import backend
 from fastapi import FastAPI
 from fastmcp import FastMCP
 from fastmcp.server.providers.openapi import MCPType, RouteMap
-
-# Explicit method/path allowlist. All other endpoints remain HTTP-only.
-MCP_ENDPOINTS = (("POST", "/api/retrieval"),)
+from settings import get_mcp_endpoints
 
 
 @asynccontextmanager
@@ -29,11 +27,16 @@ async def _combined_lifespan(app, backend_lifespan, mcp_lifespan):
 
 
 def create_mcp():
+    endpoints = get_mcp_endpoints()
+    paths = backend.openapi()["paths"]
+    for method, path in endpoints:
+        if method.lower() not in paths.get(path, {}):
+            raise ValueError(f"MCP_ENDPOINTS references an unknown OpenAPI operation: {method} {path}")
     return FastMCP.from_fastapi(
         app=backend,
         name="DLF MCP",
         route_maps=[
-            *[RouteMap(methods=[method], pattern=f"^{re.escape(path)}$", mcp_type=MCPType.TOOL) for method, path in MCP_ENDPOINTS],
+            *[RouteMap(methods=[method], pattern=f"^{re.escape(path)}$", mcp_type=MCPType.TOOL) for method, path in endpoints],
             RouteMap(pattern=r".*", mcp_type=MCPType.EXCLUDE),
         ],
     )

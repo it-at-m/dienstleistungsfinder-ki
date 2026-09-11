@@ -36,13 +36,19 @@ Supply a self-contained `query` and explicitly set `result="full"` when the assi
 
 ## Configure exposure
 
-`MCP_ENDPOINTS` in `core/backend/app.py` is an explicit HTTP method/path allowlist:
+`MCP_ENDPOINTS` is an environment setting, read by `core/backend/settings.py`. Set it in `core/backend/.env` or the Core container environment as a JSON list of exact method/path objects:
 
-```python
-MCP_ENDPOINTS = (("POST", "/api/retrieval"),)
+```dotenv
+MCP_ENDPOINTS='[{"method":"POST","path":"/api/retrieval"}]'
 ```
 
-Each entry becomes a FastMCP tool. A final exclusion rule prevents all other endpoints from becoming MCP tools or resources. Add an explicit method/path entry to expose another endpoint, then rebuild or restart Core and refresh the client's cached tool list.
+Each entry becomes a FastMCP tool. A final exclusion rule prevents all other endpoints from becoming MCP tools or resources. To expose another endpoint, add an entry, for example:
+
+```dotenv
+MCP_ENDPOINTS='[{"method":"POST","path":"/api/retrieval"},{"method":"GET","path":"/api/keywords"}]'
+```
+
+When unset, only retrieval is enabled. `MCP_ENDPOINTS='[]'` exposes no tools or resources. Invalid JSON, malformed entries, and operations absent from the backend OpenAPI schema cause startup to fail. Methods are case-insensitive; paths are exact, not regular expressions. Restart Core after changing settings and refresh the client's cached tool list; rebuilds are not required for configuration changes.
 
 ## Deployment
 

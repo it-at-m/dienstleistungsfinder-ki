@@ -73,4 +73,4 @@ Das Session-Cookie gruppiert Browseraktivitäten; die `run_id` verbindet Retriev
 
 ## MCP-Freigabe
 
-`MCP_ENDPOINTS` in `core/backend/app.py` legt die freigegebenen HTTP-Methoden und Pfade fest. Zunächst ist nur `POST /api/retrieval` freigegeben. Eine abschließende Ausschlussregel verhindert, dass weitere Endpunkte automatisch als MCP-Tools oder Ressourcen erscheinen. Für Antworten auf Basis der Dokumenttexte explizit `result="full"` angeben.
+`MCP_ENDPOINTS` wird von `core/backend/settings.py` als Umgebungseinstellung eingelesen: eine JSON-Liste von Methoden-Pfad-Objekten, beispielsweise `[{"method":"POST","path":"/api/retrieval"}]`. In `.env` oder der Container-Umgebung setzen und Core neu starten. Eine leere Liste deaktiviert alle MCP-Tools. Zunächst ist nur `POST /api/retrieval` freigegeben. Eine abschließende Ausschlussregel verhindert, dass weitere Endpunkte automatisch als MCP-Tools oder Ressourcen erscheinen. Für Antworten auf Basis der Dokumenttexte explizit `result="full"` angeben.
