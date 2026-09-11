@@ -28,10 +28,10 @@ Dienstleistungsfinder KI ist eine Retrieval-Augmented-Generation-Anwendung (RAG)
 
 Das Monorepository veröffentlicht zwei unabhängig versionierte Anwendungen:
 
-| Anwendung  | Verzeichnis | Aufgabe                                                                                                  |
-| ---------- | ----------- | -------------------------------------------------------------------------------------------------------- |
-| Core       | `core/`     | Vue Web Component, FastAPI-API, integriertes FastMCP, Retrieval- und Antwortketten sowie Auslieferung statischer Dateien       |
-| Indexer    | `indexer/`  | Sammlung, Normalisierung, Embedding, Qdrant-Indizierung und optionale Anreicherung mit Popularitätsdaten |
+| Anwendung | Verzeichnis | Aufgabe                                                                                                                  |
+| --------- | ----------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Core      | `core/`     | Vue Web Component, FastAPI-API, integriertes FastMCP, Retrieval- und Antwortketten sowie Auslieferung statischer Dateien |
+| Indexer   | `indexer/`  | Sammlung, Normalisierung, Embedding, Qdrant-Indizierung und optionale Anreicherung mit Popularitätsdaten                 |
 
 Qdrant bildet die gemeinsame Schnittstelle zwischen Indexer und Core: Der Indexer schreibt Collections, der Core liest sie. FastMCP läuft innerhalb des Core und stellt dessen Retrieval-Endpunkt für Agenten bereit. Dadurch kann die Indizierung als geplanter Job laufen, ohne an den nutzerseitigen Anfrageverkehr gekoppelt zu sein.
 

@@ -4,12 +4,12 @@ The system is split into an offline write path and an online read path. Both use
 
 ## Component view
 
-| Component       | Technology           | Runs as                           | Main dependency                             |
-| --------------- | -------------------- | --------------------------------- | ------------------------------------------- |
-| Search UI       | Vue 3 custom element | Static browser assets             | Core HTTP API                               |
-| Core API        | FastAPI, FastMCP, LangChain   | Long-running service on port 8080 | Qdrant, OpenAI-compatible API, Langfuse     |
-| Indexer         | Python, LangChain    | On-demand or scheduled job        | Content APIs, Qdrant, OpenAI-compatible API |
-| Vector database | Qdrant               | Long-running service on port 6333 | Persistent volume                           |
+| Component       | Technology                  | Runs as                           | Main dependency                             |
+| --------------- | --------------------------- | --------------------------------- | ------------------------------------------- |
+| Search UI       | Vue 3 custom element        | Static browser assets             | Core HTTP API                               |
+| Core API        | FastAPI, FastMCP, LangChain | Long-running service on port 8080 | Qdrant, OpenAI-compatible API, Langfuse     |
+| Indexer         | Python, LangChain           | On-demand or scheduled job        | Content APIs, Qdrant, OpenAI-compatible API |
+| Vector database | Qdrant                      | Long-running service on port 6333 | Persistent volume                           |
 
 The core container is a multi-stage image. Node builds the frontend first; the resulting static assets are copied into the Python runtime image and mounted by FastAPI at `/`. API routes remain under `/api`; the integrated FastMCP server serves Streamable HTTP at `/mcp` in the same process.
 

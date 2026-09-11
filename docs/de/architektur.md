@@ -4,12 +4,12 @@ Das System ist in einen asynchronen Schreibpfad und einen nutzerseitigen Lesepfa
 
 ## Komponenten
 
-| Komponente      | Technologie          | Ausführungsform                   | Hauptabhängigkeit                           |
-| --------------- | -------------------- | --------------------------------- | ------------------------------------------- |
-| Suchoberfläche  | Vue 3 Custom Element | Statische Browserdateien          | Core-HTTP-API                               |
-| Core-API        | FastAPI, FastMCP, LangChain   | Dauerhafter Dienst auf Port 8080  | Qdrant, OpenAI-kompatible API, Langfuse     |
-| Indexer         | Python, LangChain    | Bedarfs- oder zeitgesteuerter Job | Inhalts-APIs, Qdrant, OpenAI-kompatible API |
-| Vektordatenbank | Qdrant               | Dauerhafter Dienst auf Port 6333  | Persistentes Volume                         |
+| Komponente      | Technologie                 | Ausführungsform                   | Hauptabhängigkeit                           |
+| --------------- | --------------------------- | --------------------------------- | ------------------------------------------- |
+| Suchoberfläche  | Vue 3 Custom Element        | Statische Browserdateien          | Core-HTTP-API                               |
+| Core-API        | FastAPI, FastMCP, LangChain | Dauerhafter Dienst auf Port 8080  | Qdrant, OpenAI-kompatible API, Langfuse     |
+| Indexer         | Python, LangChain           | Bedarfs- oder zeitgesteuerter Job | Inhalts-APIs, Qdrant, OpenAI-kompatible API |
+| Vektordatenbank | Qdrant                      | Dauerhafter Dienst auf Port 6333  | Persistentes Volume                         |
 
 Der Core-Container wird in mehreren Stufen erstellt. Zuerst baut Node das Frontend. Anschließend werden die statischen Dateien in das Python-Laufzeit-Image kopiert und von FastAPI unter `/` bereitgestellt. API-Routen liegen unter `/api`; der integrierte FastMCP-Server bietet Streamable HTTP unter `/mcp` im selben Prozess an.
 

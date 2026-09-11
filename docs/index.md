@@ -28,10 +28,10 @@ Dienstleistungsfinder KI is a retrieval-augmented generation (RAG) application f
 
 The monorepo publishes two independently versioned applications:
 
-| Application | Location   | Responsibility                                                                            |
-| ----------- | ---------- | ----------------------------------------------------------------------------------------- |
-| Core        | `core/`    | Vue web component, FastAPI API, integrated FastMCP, retrieval and answer chains, and static-file serving      |
-| Indexer     | `indexer/` | Collection, normalization, embedding, Qdrant indexing, and optional popularity enrichment |
+| Application | Location   | Responsibility                                                                                           |
+| ----------- | ---------- | -------------------------------------------------------------------------------------------------------- |
+| Core        | `core/`    | Vue web component, FastAPI API, integrated FastMCP, retrieval and answer chains, and static-file serving |
+| Indexer     | `indexer/` | Collection, normalization, embedding, Qdrant indexing, and optional popularity enrichment                |
 
 Qdrant is the shared boundary between the indexer and Core. The indexer writes collections; Core reads them. FastMCP runs inside Core and exposes its retrieval endpoint to agents. This separation allows indexing to run as a scheduled job without coupling it to user-facing request traffic.
 

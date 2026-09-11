@@ -15,16 +15,16 @@ The core exposes a FastAPI application and composes LangChain runnables for quer
 
 ## HTTP endpoints
 
-| Method | Path                    | Operation                                        | Audience              |
-| ------ | ----------------------- | ------------------------------------------------ | --------------------- |
-| GET    | `/api/healthz`          | Process status and application version           | Operations            |
-| GET    | `/api/keywords`         | Valid keyword filter values                      | Frontend, MCP clients |
-| GET    | `/api/categories`       | Valid category filter values                     | Frontend, MCP clients |
-| GET    | `/api/config`           | Examples and feedback templates | Frontend              |
-| POST   | `/api/retrieval`        | Retrieve ranked service documents                | Frontend, MCP clients |
-| POST   | `/api/answer`           | Generate an answer from one selected document    | Frontend              |
-| POST   | `/api/score`            | Attach binary feedback to a Langfuse trace       | Frontend              |
-| GET    | `/api/popularity-stats` | Current popularity normalization statistics      | Operations            |
+| Method | Path                    | Operation                                     | Audience              |
+| ------ | ----------------------- | --------------------------------------------- | --------------------- |
+| GET    | `/api/healthz`          | Process status and application version        | Operations            |
+| GET    | `/api/keywords`         | Valid keyword filter values                   | Frontend, MCP clients |
+| GET    | `/api/categories`       | Valid category filter values                  | Frontend, MCP clients |
+| GET    | `/api/config`           | Examples and feedback templates               | Frontend              |
+| POST   | `/api/retrieval`        | Retrieve ranked service documents             | Frontend, MCP clients |
+| POST   | `/api/answer`           | Generate an answer from one selected document | Frontend              |
+| POST   | `/api/score`            | Attach binary feedback to a Langfuse trace    | Frontend              |
+| GET    | `/api/popularity-stats` | Current popularity normalization statistics   | Operations            |
 
 Interactive Swagger and ReDoc are available at `/docs` and `/redoc` unless `DLF_ENABLE_DOCS=false`.
 

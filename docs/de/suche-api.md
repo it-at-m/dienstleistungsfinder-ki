@@ -15,16 +15,16 @@ Der Core stellt eine FastAPI-Anwendung bereit und kombiniert LangChain-Runnables
 
 ## HTTP-Endpunkte
 
-| Methode | Pfad                    | Funktion                                                             | Zielgruppe            |
-| ------- | ----------------------- | -------------------------------------------------------------------- | --------------------- |
-| GET     | `/api/healthz`          | Prozessstatus und Anwendungsversion                                  | Betrieb               |
-| GET     | `/api/keywords`         | Gültige Schlagwortfilter                                             | Frontend, MCP-Clients |
-| GET     | `/api/categories`       | Gültige Kategoriefilter                                              | Frontend, MCP-Clients |
-| GET     | `/api/config`           | Beispiele und Feedback-Vorlagen                     | Frontend              |
-| POST    | `/api/retrieval`        | Priorisierte Dienstleistungsdokumente abrufen                        | Frontend, MCP-Clients |
-| POST    | `/api/answer`           | Antwort aus einem ausgewählten Dokument erzeugen                     | Frontend              |
-| POST    | `/api/score`            | Binäres Feedback mit einem Langfuse-Trace verknüpfen                 | Frontend              |
-| GET     | `/api/popularity-stats` | Aktuelle Statistik zur Popularitätsnormalisierung                    | Betrieb               |
+| Methode | Pfad                    | Funktion                                             | Zielgruppe            |
+| ------- | ----------------------- | ---------------------------------------------------- | --------------------- |
+| GET     | `/api/healthz`          | Prozessstatus und Anwendungsversion                  | Betrieb               |
+| GET     | `/api/keywords`         | Gültige Schlagwortfilter                             | Frontend, MCP-Clients |
+| GET     | `/api/categories`       | Gültige Kategoriefilter                              | Frontend, MCP-Clients |
+| GET     | `/api/config`           | Beispiele und Feedback-Vorlagen                      | Frontend              |
+| POST    | `/api/retrieval`        | Priorisierte Dienstleistungsdokumente abrufen        | Frontend, MCP-Clients |
+| POST    | `/api/answer`           | Antwort aus einem ausgewählten Dokument erzeugen     | Frontend              |
+| POST    | `/api/score`            | Binäres Feedback mit einem Langfuse-Trace verknüpfen | Frontend              |
+| GET     | `/api/popularity-stats` | Aktuelle Statistik zur Popularitätsnormalisierung    | Betrieb               |
 
 Interaktive Swagger- und ReDoc-Oberflächen sind unter `/docs` und `/redoc` verfügbar, sofern `DLF_ENABLE_DOCS` nicht auf `false` gesetzt ist.
 
