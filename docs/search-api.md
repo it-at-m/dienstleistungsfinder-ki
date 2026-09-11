@@ -1,6 +1,6 @@
 # Search and API
 
-The core exposes a FastAPI application and composes LangChain runnables for query enhancement, hybrid retrieval, optional reranking, scrubbing, and document-grounded answers.
+The core exposes a FastAPI application and composes LangChain runnables for query enhancement, hybrid retrieval, optional reranking and document-grounded answers.
 
 ## Search chain
 
@@ -15,23 +15,22 @@ The core exposes a FastAPI application and composes LangChain runnables for quer
 
 ## HTTP endpoints
 
-| Method | Path                    | Operation                                        | Audience              |
-| ------ | ----------------------- | ------------------------------------------------ | --------------------- |
-| GET    | `/api/healthz`          | Process status and application version           | Operations            |
-| GET    | `/api/keywords`         | Valid keyword filter values                      | Frontend, MCP clients |
-| GET    | `/api/categories`       | Valid category filter values                     | Frontend, MCP clients |
-| GET    | `/api/config`           | Examples, feedback templates, and scrubber state | Frontend              |
-| POST   | `/api/scrub`            | Remove likely personal data and create a run ID  | Frontend, MCP clients |
-| POST   | `/api/retrieval`        | Retrieve ranked service documents                | Frontend, MCP clients |
-| POST   | `/api/answer`           | Generate an answer from one selected document    | Frontend              |
-| POST   | `/api/score`            | Attach binary feedback to a Langfuse trace       | Frontend              |
-| GET    | `/api/popularity-stats` | Current popularity normalization statistics      | Operations            |
+| Method | Path                    | Operation                                     | Audience              |
+| ------ | ----------------------- | --------------------------------------------- | --------------------- |
+| GET    | `/api/healthz`          | Process status and application version        | Operations            |
+| GET    | `/api/keywords`         | Valid keyword filter values                   | Frontend, MCP clients |
+| GET    | `/api/categories`       | Valid category filter values                  | Frontend, MCP clients |
+| GET    | `/api/config`           | Examples and feedback templates               | Frontend              |
+| POST   | `/api/retrieval`        | Retrieve ranked service documents             | Frontend, MCP clients |
+| POST   | `/api/answer`           | Generate an answer from one selected document | Frontend              |
+| POST   | `/api/score`            | Attach binary feedback to a Langfuse trace    | Frontend              |
+| GET    | `/api/popularity-stats` | Current popularity normalization statistics   | Operations            |
 
 Interactive Swagger and ReDoc are available at `/docs` and `/redoc` unless `DLF_ENABLE_DOCS=false`.
 
 ## Typical API flow
 
-First retrieve documents (or call `/api/scrub` before this when enabled):
+First retrieve documents:
 
 ```bash
 curl -X POST http://localhost:8080/api/retrieval \
@@ -68,8 +67,10 @@ The `RetrievalInput` model supports query enhancement, exact keyword/category fi
 
 - `422` reports invalid request shapes or unknown filter values.
 - `404` means the selected document did not yield a grounded answer.
-- `501` means scrubbing was requested but disabled.
-- `504` means the scrubber exceeded its timeout.
 - Model content-policy failures are translated into an explicit API error.
 
-The session cookie groups browser activity; `run_id` correlates scrub, retrieval, answer, and score calls. Langfuse callbacks capture chain activity, prompts, latency, and user feedback. Do not log raw secrets or add sensitive user text to custom log statements.
+The session cookie groups browser activity; `run_id` correlates retrieval, answer, and score calls. Langfuse callbacks capture chain activity, prompts, latency, and user feedback. Do not log raw secrets or add sensitive user text to custom log statements.
+
+## MCP exposure
+
+`core/backend/settings.py` reads the `MCP_ENDPOINTS` environment setting as a JSON list of method/path objects, for example `[{"method":"POST","path":"/api/retrieval"}]`. Set it in `.env` or the container environment and restart Core. An empty list disables all MCP tools. Only `POST /api/retrieval` is enabled initially; a final exclusion rule prevents all other endpoints from becoming MCP tools or resources. Add an explicit entry to expose another endpoint. For answers grounded in retrieved text, explicitly request `result="full"`.

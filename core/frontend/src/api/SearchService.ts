@@ -3,7 +3,6 @@ import type DLFAnswer from "@/types/DLFAnswer";
 import type RetrievalInput from "@/types/RetrievalInput";
 import type RetrievalResult from "@/types/RetrievalResult";
 import type { RetrievedDocument } from "@/types/RetrievalResult";
-import type ScrubResult from "@/types/ScrubResult";
 
 import {
   ANSWER_ENDPOINT,
@@ -11,7 +10,6 @@ import {
   QUERY_LENGTH_LIMIT_ERROR_TYPE,
   RETRIEVAL_ENDPOINT,
   SCORE_ENDPOINT,
-  SCRUBBER_ENDPOINT,
 } from "@/util/constants";
 
 type Callback<T> = (result: T) => void;
@@ -27,42 +25,6 @@ class ContentFilterException extends Error {
  * Service class for performing search operations against the backend API.
  */
 export default class SearchService {
-  static scrub(
-    input: { query: string },
-    signal: AbortSignal
-  ): Promise<ScrubResult | undefined> {
-    return fetch(`${getAPIBaseURL()}${SCRUBBER_ENDPOINT}`, {
-      method: "POST",
-      signal: signal,
-      body: JSON.stringify(input), // Add the input as the request body
-      headers: {
-        "Content-Type": "application/json", // Set the content type header
-      },
-    }).then((response) => {
-      if (response.status !== 200) {
-        if (response.status === 422) {
-          return response.json().then((error) => {
-            const detail = error["detail"][0];
-            if (detail["type"] == QUERY_LENGTH_LIMIT_ERROR_TYPE) {
-              //msg sth like: "String should have at most 300 characters". Parse number of characters
-              const match = detail["msg"].match(/\d+/);
-              let error_msg;
-              if (match) {
-                const number = parseInt(match[0], 10);
-                error_msg = `Die Anfrage ist zu lang. Die maximale Länge beträgt ${number} Zeichen.`;
-              } else error_msg = `Die Anfrage ist zu lang.`;
-              return Promise.reject(error_msg);
-            }
-            return Promise.reject("Anfrage ist leer");
-          });
-        }
-        Promise.reject(
-          "Anonymisierung der Daten konnte nicht durchgeführt werden"
-        );
-      } else return response.json() as unknown as ScrubResult;
-    });
-  }
-
   static retrieval(
     input: RetrievalInput,
     signal: AbortSignal
@@ -128,9 +90,7 @@ export default class SearchService {
    * @param onFailure - Callback function called when an error occurs during search.
    * @param onComplete - Callback function called when the search is complete.
    * @param onRetrieval - Callback function called when documents are retrieved.
-   * @param onScrubbed - Callback function called when the query is scrubbed.
    * @param signal - The AbortSignal used to cancel the search.
-   * @param scrubber_enabled - A boolean indicating whether the scrubber is enabled.
    * @throws {ApiError} If the query is empty or null.
    */
   static search(
@@ -139,9 +99,7 @@ export default class SearchService {
     onFailure: Callback<RetrievedDocument>,
     onComplete: Callback<void>,
     onRetrieval: Callback<RetrievalResult>,
-    onScrubbed: Callback<ScrubResult>,
     signal: AbortSignal,
-    scrubber_enabled: boolean,
     keywords?: string[],
     categories?: string[]
   ): Promise<void> {
@@ -154,9 +112,7 @@ export default class SearchService {
         onFailure,
         onComplete,
         onRetrieval,
-        onScrubbed,
         signal,
-        scrubber_enabled,
         keywords,
         categories
       );
@@ -172,9 +128,7 @@ export default class SearchService {
    * @param onFailure - Callback function called when a document answer chain fails.
    * @param onComplete - Callback function called when the search operation is complete.
    * @param onRetrieval - Callback function called when documents are retrieved.
-   * @param onScrubbed - Callback function called when the query is scrubbed.
    * @param signal - The AbortSignal used to cancel the search operation.
-   * @param scrubber_enabled - A boolean indicating whether the scrubber is enabled.
    * @returns A Promise that resolves when the search operation is complete.
    */
   private static async performSearch(
@@ -183,13 +137,10 @@ export default class SearchService {
     onFailure: Callback<RetrievedDocument>,
     onComplete: Callback<void>,
     onRetrieval: Callback<RetrievalResult>,
-    onScrubbed: Callback<ScrubResult>,
     signal: AbortSignal,
-    scrubber_enabled: boolean,
     keywords?: string[],
     categories?: string[]
   ): Promise<void> {
-    let retrievalInput: RetrievalInput;
     const textQuery = (query ?? "").trim();
     const hasTextQuery = textQuery.length > 0;
     const hasKeywords = !!(keywords && keywords.length > 0);
@@ -202,32 +153,10 @@ export default class SearchService {
       fallbackTerms.push(...categories);
     }
     const effectiveQuery = hasTextQuery ? textQuery : fallbackTerms.join(" ");
-    // optional scrubbing step
-    if (scrubber_enabled && hasTextQuery) {
-      const scrubResult = await SearchService.scrub(
-        { query: textQuery },
-        signal
-      );
-      if (!scrubResult)
-        return Promise.reject(
-          "Anonymisierung der Daten konnte nicht durchgeführt werden"
-        );
-      onScrubbed(scrubResult);
-      retrievalInput = SearchService.buildRetrievalInput(
-        scrubResult.scrubbed_query,
-        {
-          run_id: scrubResult.run_id,
-          keywords: hasKeywords ? keywords : undefined,
-          categories: hasCategories ? categories : undefined,
-        }
-      );
-    } else {
-      // retrieval without traceid, let retrieval generate it.
-      retrievalInput = SearchService.buildRetrievalInput(effectiveQuery, {
-        keywords: hasKeywords ? keywords : undefined,
-        categories: hasCategories ? categories : undefined,
-      });
-    }
+    const retrievalInput = SearchService.buildRetrievalInput(effectiveQuery, {
+      keywords: hasKeywords ? keywords : undefined,
+      categories: hasCategories ? categories : undefined,
+    });
     return SearchService.retrieval(retrievalInput, signal)
       .then(async (retrievalResult) => {
         if (!retrievalResult) {

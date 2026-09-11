@@ -49,6 +49,7 @@ export default defineConfig({
               { text: "Local development", link: "/local-development" },
               { text: "Indexing pipeline", link: "/indexing-pipeline" },
               { text: "Search and API", link: "/search-api" },
+              { text: "MCP server", link: "/mcp-server" },
               { text: "Frontend and deployment", link: "/frontend-deployment" },
             ],
           },
@@ -74,6 +75,7 @@ export default defineConfig({
               { text: "Lokale Entwicklung", link: "/de/lokale-entwicklung" },
               { text: "Indizierungspipeline", link: "/de/indexing-pipeline" },
               { text: "Suche und API", link: "/de/suche-api" },
+              { text: "MCP-Server", link: "/de/mcp-server" },
               {
                 text: "Frontend und Bereitstellung",
                 link: "/de/frontend-bereitstellung",

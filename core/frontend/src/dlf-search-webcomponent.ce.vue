@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/* eslint-disable vue/no-v-html */
 import type DLFAnswer from "@/types/DLFAnswer";
 
 import { MucCallout } from "@muenchen/muc-patternlab-vue";
@@ -9,7 +10,6 @@ import { computed, nextTick, onMounted, ref } from "vue";
 import type FrontendConfig from "./types/FrontendConfig";
 import type { RetrievedDocument } from "./types/RetrievalResult";
 import type RetrievalResult from "./types/RetrievalResult";
-import type ScrubResult from "./types/ScrubResult";
 
 import CategoryService from "@/api/CategoryService";
 import KeywordService from "@/api/KeywordService";
@@ -110,15 +110,6 @@ onMounted(() => {
 const loading_progress = computed(() => {
   return (current_loading_step.value / number_of_loading_steps.value) * 100;
 });
-
-/**
- * Callback function called when scrubbing is performed.
- * @param {ScrubResult} scrubResult - The result of the scrubbing operation.
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const onScrubbedCallback = (_: ScrubResult) => {
-  current_loading_step.value = 2;
-};
 
 /**
  * Callback function for document retrieval.
@@ -264,9 +255,7 @@ const submitQuery = (query: string) => {
     onFailedCallback,
     onCompleteCallback,
     onRetrievalCallback,
-    onScrubbedCallback,
     abortController.signal,
-    config.value.scrubber_enabled,
     combinedKeywords,
     combinedCategories
   ).catch((e: string) => {
@@ -298,8 +287,18 @@ const scoreResult = (value: boolean) => {
   />
   <main>
     <div>
+      <!--
+          Icon sprites are static, trusted HTML fragments.
+          eslint-disable-next-line vue/no-v-html
+        -->
       <div v-html="mucIconsSprite" />
+      <!--
+          eslint-disable-next-line vue/no-v-html
+        -->
       <div v-html="customIconsSprite" />
+      <!--
+          eslint-disable-next-line vue/no-v-html
+        -->
       <div v-html="dlfIconsSprite" />
 
       <dlf-intro labelfor="dlf-searchbar">

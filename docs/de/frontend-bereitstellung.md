@@ -8,7 +8,7 @@ Das Vue-Frontend wird als Standard-Custom-Element `<dlf-search-webcomponent>` au
 
 Beim Mounten lädt die Komponente:
 
-- Laufzeitkonfiguration für Feedback, Beispiele und Scrubber von `/api/config`;
+- Laufzeitkonfiguration für Feedback und Beispiele von `/api/config`;
 - verfügbare Filterwerte von `/api/keywords` und `/api/categories`.
 
 Eine Suche kann durch Text, Schlagwortfilter, Kategoriefilter oder eine Kombination ausgelöst werden. `AbortController` beendet eine laufende Anfrage, sobald eine neuere Suche startet. Nach dem Retrieval werden Antwortanfragen pro Kandidat ausgeführt und Ergebnisse fortlaufend angezeigt.

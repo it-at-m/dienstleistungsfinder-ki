@@ -5,7 +5,7 @@ Dienstleistungsfinder KI is a retrieval-augmented search application for public 
 ## Architecture
 
 - `core/frontend`: Vue web component, built with Node.
-- `core/backend`: FastAPI API and static-file server.
+- `core/backend`: FastAPI API, integrated FastMCP server at `/mcp`, and static-file server.
 - `core/Dockerfile`: multi-stage image that builds the frontend and serves it with the backend on port 8080.
 - `indexer`: opt-in collection, transformation, embedding, and Qdrant indexing job.
 - `compose.yaml`: local core and Qdrant environment; the indexer is behind the `indexer` profile.
@@ -22,7 +22,7 @@ cp indexer/.env.example indexer/.env
 docker compose up --build core
 ```
 
-The UI is at `http://localhost:8080/` and health is at `http://localhost:8080/api/healthz`. Run the external indexer only when its required secrets and endpoints are configured:
+The UI is at `http://localhost:8080/`, health is at `http://localhost:8080/api/healthz`, and the integrated FastMCP endpoint is at `http://localhost:8080/mcp`. MCP clients use Streamable HTTP; only the retrieval tool is exposed by default. See [MCP integration](docs/mcp-server.md) for configuration. Run the external indexer only when its required secrets and endpoints are configured:
 
 ```shell
 docker compose --profile indexer run --rm indexer

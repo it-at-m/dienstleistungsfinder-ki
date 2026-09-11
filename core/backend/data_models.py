@@ -58,49 +58,16 @@ class HealthCheckResponse(BaseModel):
     version: str = Field(description="Backend application version currently serving requests.", examples=["v0.1.0"])
 
 
-class ScrubInput(BaseModel):
-    """Input for anonymizing a user question before retrieval."""
-
-    query: str = Field(
-        description=(
-            "Natural-language user question to anonymize before document retrieval. "
-            "Use the user's original wording. The query must not exceed the configured maximum length."
-        ),
-        max_length=QUERY_MAXLENGTH,
-        examples=["Mein Name ist Peter Maier, ich bin arm. Wer hilft mir?"],
-    )
-
-
-class ScrubResult(BaseModel):
-    """Anonymized query plus the run identifier to reuse in later calls."""
-
-    scrubbed_query: str = Field(
-        description=(
-            "Privacy-preserving version of the input query. Pass this value to "
-            "`retrieve_munich_service_documents.query` instead of the original query."
-        ),
-        examples=["Mein Name ist PERSON1, ich bin arm. Wer hilft mir?"],
-    )
-    run_id: UUID | None = Field(
-        description=(
-            "Trace identifier for this user request. Reuse it in retrieval and feedback calls "
-            "so the workflow can be correlated in observability."
-        ),
-        examples=[UUID("3fff1df2-e7a4-4f6c-ba98-d0529cdc22ff")],
-        default=None,
-    )
-
-
 class RetrievalInput(BaseModel):
     """Search request for finding Munich service documents relevant to a question."""
 
     query: str = Field(
         description=(
-            "Natural-language search question. If `scrub_user_query` was called, use its `scrubbed_query` here. "
+            "Self-contained natural-language search question including relevant context from the conversation. "
             "The backend can enhance the query for German administrative terminology when `enhance_query` is true."
         ),
         max_length=QUERY_MAXLENGTH,
-        examples=["Mein Name ist PERSON1, ich bin arm. Wer hilft mir?"],
+        examples=["Welche finanzielle Unterstützung kann ich bei geringem Einkommen in München beantragen?"],
     )
     enhance_query: bool = Field(
         description=(
@@ -111,21 +78,19 @@ class RetrievalInput(BaseModel):
     )
     keywords: list[str] | None = Field(
         description=(
-            "Optional metadata keyword filters. Values must exactly match strings returned by `get_available_keywords`; "
-            "omit this field when no keyword filter is needed."
+            "Optional metadata keyword filters. Use only known exact keyword values; omit this field when no keyword filter is needed."
         ),
         default=None,
     )
     categories: list[str] | None = Field(
         description=(
-            "Optional document category filters. Values must exactly match strings returned by `get_available_categories`; "
-            "omit this field when no category filter is needed."
+            "Optional document category filters. Use only known exact category values; omit this field when no category filter is needed."
         ),
         default=None,
     )
     run_id: UUID | None = Field(
         description=(
-            "Trace identifier from `scrub_user_query`. If omitted, retrieval creates a new run_id. "
+            "Optional trace identifier. If omitted, retrieval creates a new run_id. "
             "Reuse the resulting run_id for observability and feedback correlation."
         ),
         examples=[UUID("3fff1df2-e7a4-4f6c-ba98-d0529cdc22ff")],
@@ -220,7 +185,7 @@ class EnhancedQuery(BaseModel):
 
     refined_query: str = Field(description="Cleaned version of the user's original intent used by the answer model.")
 
-    original_query: str = Field(description="The user query before enhancement. This may be the scrubbed query if scrubbing was used.")
+    original_query: str = Field(description="The user query before enhancement.")
 
     categories: list[str] = Field(
         description="Administrative categories inferred during query enhancement.",
@@ -263,7 +228,7 @@ class AnswerInput(BaseModel):
         description="The `enhanced_query` object returned by `retrieve_munich_service_documents`. Pass it unchanged when using this helper.",
     )
     run_id: UUID = Field(
-        description="Trace identifier returned by retrieval or scrubbing. Pass it unchanged for observability.",
+        description="Trace identifier returned by retrieval. Pass it unchanged for observability.",
         examples=[UUID("3fff1df2-e7a4-4f6c-ba98-d0529cdc22ff")],
     )
 
@@ -319,7 +284,6 @@ class DLFContext(BaseModel):
     vectorstore: dict[str, QdrantVectorStore] | None = None
     retriever: Runnable[str, list[Document]] | None = None
     answer_chain: Runnable[AnswerChainInput, AnswerResult] | None = None
-    scrubber_chain: Runnable[str, str] | None = None
     langfuse: Langfuse | None = None
     langfuse_handler: CallbackHandler | None = None
     reranker: Reranker | None = None
@@ -350,23 +314,11 @@ class FrontendConfig(BaseModel):
     """Runtime configuration consumed by the search web component."""
 
     feedback: FeedbackConfig = Field(description="Mail templates used by the frontend feedback UI.")
-    scrubber_enabled: bool = Field(
-        description="Whether the backend scrubber endpoint is enabled. MCP clients can use this to decide whether to scrub before retrieval.",
-        default=False,
-    )
     examples: list[str] = Field(description="Example questions shown by the frontend.")
 
 
 class NoAnswerFoundError(BaseModel):
     detail: str = "No answer found in document '{x}'."
-
-
-class ScrubberDisabledError(BaseModel):
-    detail: str = "Scrubber is disabled."
-
-
-class ScrubberTimeoutError(BaseModel):
-    detail: str = "Scrubber request timed out."
 
 
 class ContentFilterError(BaseModel):
