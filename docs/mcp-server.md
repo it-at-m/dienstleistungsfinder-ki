@@ -1,115 +1,49 @@
-# MCP server
+# MCP integration in Core
 
-The MCP server makes Dienstleistungsfinder retrieval available to MCP-compatible agents. It is a small, stateless adapter: clients call an MCP tool, the server sends the query to the Core retrieval API, and the complete retrieval result is returned to the client.
+Core includes a FastMCP server in the same process and container as the FastAPI backend. It exposes the Streamable HTTP endpoint `/mcp` on port 8080.
 
 ```text
-MCP client ──► Streamable HTTP /mcp ──► MCP server ──► POST /api/retrieval ──► Core
+MCP client ──► Core /mcp (FastMCP) ──► Core retrieval chain
 ```
 
-It does not connect directly to Qdrant, embedding models, rerankers, or Langfuse. Those responsibilities remain in Core.
+## Run and connect
 
-## Tool
-
-The server exposes exactly one read-only tool:
-
-| Tool                                | Input                               | Result                                                                |
-| ----------------------------------- | ----------------------------------- | --------------------------------------------------------------------- |
-| `retrieve_munich_service_documents` | A non-empty, self-contained `query` | Full documents, source metadata, run ID, and enhanced query from Core |
-
-Agents should use the returned document text to answer and cite URLs from the metadata. The tool searches existing information; it does not submit applications or book appointments.
-
-## Run locally
-
-The server requires Python 3.13 and [uv](https://docs.astral.sh/uv/). Run commands from the `mcp` directory so Pydantic loads `mcp/.env`:
+Configure Core as described in [Local development](./local-development), then start it from the repository root:
 
 ```shell
-cd mcp
-cp .env.example .env
-uv sync --locked
-uv run dlf-search-mcp
+docker compose up --build core
 ```
 
-The default Streamable HTTP endpoint is `http://localhost:8081/mcp`; `GET /healthz` is the health endpoint. Set `MCP_TRANSPORT=stdio` for a local stdio client.
+A client running on the host connects to `http://localhost:8080/mcp`. For a client in another Docker container, use a hostname reachable from that container, such as `http://host.docker.internal:8080/mcp` for Core's published host port, or `http://core:8080/mcp` on a shared Docker network. Inside the client container, `localhost` refers to the client container itself.
 
-## Configuration
-
-Environment variables override values from `.env` in the current working directory.
-
-| Variable              | Default                               | Purpose                                                 |
-| --------------------- | ------------------------------------- | ------------------------------------------------------- |
-| `DLF_RETRIEVAL_URL`   | `http://localhost:8080/api/retrieval` | Complete Core retrieval URL                             |
-| `DLF_TIMEOUT`         | `60`                                  | Core request timeout in seconds                         |
-| `MCP_TRANSPORT`       | `streamable-http`                     | `streamable-http` or `stdio`                            |
-| `MCP_HOST`            | `0.0.0.0`                             | HTTP bind address                                       |
-| `MCP_PORT`            | `8081`; image: `8080`                 | HTTP listen port                                        |
-| `MCP_LOG_LEVEL`       | `INFO`                                | Python and MCP SDK log level                            |
-| `MCP_COLLECTIONS`     | `all`                                 | `all` or a JSON list containing `service` and/or `info` |
-| `MCP_ENHANCE_QUERY`   | `true`                                | Request query enhancement from Core                     |
-| `MCP_RERANK`          | `false`                               | Request reranking from Core                             |
-| `MCP_N_RESULTS`       | unset                                 | Optional result limit from 1 to 20                      |
-| `MCP_ALLOWED_HOSTS`   | MCP SDK defaults                      | JSON list of accepted HTTP `Host` headers               |
-| `MCP_ALLOWED_ORIGINS` | `[]`                                  | JSON list of accepted HTTP `Origin` headers             |
-
-At startup, the effective non-secret configuration is written at info level. This includes the bind address, transport, MCP path, backend URL without credentials or query parameters, retrieval options, and the parsed host and origin allowlists. Check these messages first when a deployment does not use an expected environment value.
-
-## Transport security
-
-Setting `MCP_ALLOWED_HOSTS` enables an explicit allowlist through the MCP SDK's DNS-rebinding protection. Host entries omit the scheme and match exactly, including the port. The only supported wildcard form is `hostname:*`, which accepts any port for that exact hostname; it does not match subdomains.
-
-```dotenv
-MCP_ALLOWED_HOSTS=["localhost:*","127.0.0.1:*","dlf-mcp.namespace.svc:*","mcp.example.org","mcp.example.org:*"]
-MCP_ALLOWED_ORIGINS=["https://client.example.org"]
-```
-
-Requests without an `Origin` header are accepted when their host is valid. If a browser or proxy sends `Origin`, that exact value must be present in `MCP_ALLOWED_ORIGINS`. Origins include the scheme and, when non-default, the port.
-
-| Response                    | Meaning                                                             |
-| --------------------------- | ------------------------------------------------------------------- |
-| `421 Invalid Host header`   | The received `Host` value is absent from `MCP_ALLOWED_HOSTS`        |
-| `403 Invalid Origin header` | The request has an `Origin` value absent from `MCP_ALLOWED_ORIGINS` |
-
-The SDK logs the rejected value. Compare it with the parsed allowlists printed during startup.
-
-## OpenShift
-
-The container listens on port 8080. Configure the Core Service URL and allow every hostname by which clients or routers address the MCP server:
+For MUCGPT, configure:
 
 ```yaml
-env:
-  - name: DLF_RETRIEVAL_URL
-    value: http://dlf-core:8080/api/retrieval
-  - name: MCP_ALLOWED_HOSTS
-    value: '["localhost:*","127.0.0.1:*","dlf-mcp","dlf-mcp:*","dlf-mcp.namespace.svc:*","mcp.example.org","mcp.example.org:*"]'
+MCP:
+  SOURCES:
+    DLF:
+      url: "http://host.docker.internal:8080/mcp"
+      transport: "streamable_http"
 ```
 
-OpenShift and Kubernetes HTTP probes normally send the pod IP and port as the `Host` header. Pod IPs are dynamic and should not be added to the allowlist. Send an already allowed host explicitly in both probes:
+On Linux Docker Engine, the client container may need `extra_hosts: ["host.docker.internal:host-gateway"]`. Core's normal `python app.py` launch binds to `0.0.0.0:8080`; `--development` binds only to localhost. Use `/api/healthz` to check Core's health.
 
-```yaml
-readinessProbe:
-  httpGet:
-    path: /healthz
-    port: http
-    httpHeaders:
-      - name: Host
-        value: localhost:8080
-livenessProbe:
-  httpGet:
-    path: /healthz
-    port: http
-    httpHeaders:
-      - name: Host
-        value: localhost:8080
+## Exposed tool
+
+Only `retrieve_munich_service_documents` is exposed initially. It searches official Munich service information without submitting applications or booking appointments.
+
+Supply a self-contained `query` and explicitly set `result="full"` when the assistant needs document text to answer. The API default, `minimal`, returns compact document references and metadata. Keep `enhance_query=true` and `collections="all"` for general searches; omit keyword and category filters unless their exact valid values are known. Answer from the retrieved text and cite its source URLs.
+
+## Configure exposure
+
+`MCP_ENDPOINTS` in `core/backend/app.py` is an explicit HTTP method/path allowlist:
+
+```python
+MCP_ENDPOINTS = (("POST", "/api/retrieval"),)
 ```
 
-After changing environment values, roll out a new pod because settings are read only at process startup. Confirm the effective value in a running deployment with:
+Each entry becomes a FastMCP tool. A final exclusion rule prevents all other endpoints from becoming MCP tools or resources. Add an explicit method/path entry to expose another endpoint, then rebuild or restart Core and refresh the client's cached tool list.
 
-```shell
-oc exec deployment/dlf-mcp -n namespace -- printenv MCP_ALLOWED_HOSTS
-oc logs deployment/dlf-mcp -n namespace | grep -E "Transport security|Invalid Host|Invalid Origin"
-```
+## Deployment
 
-The server has no client authentication of its own. Protect external Routes with the platform's authentication and authorization controls and use a proxy timeout longer than `DLF_TIMEOUT`.
-
-## Image and releases
-
-`mcp/Dockerfile` builds the OpenShift-compatible image. Tags named `mcp-vX.Y.Z` publish `ghcr.io/it-at-m/dienstleistungsfinder-ki-mcp:X.Y.Z` and `latest`; the release workflow also publishes an immutable `sha-<commit>` tag. Deployments should pin a reviewed version and digest.
+MCP is shipped in `ghcr.io/it-at-m/dienstleistungsfinder-ki-core:<version>` through the Core release workflow. Route `/mcp` to the same Core service and port as the HTTP API. It uses Core's environment configuration and startup lifecycle. Protect externally exposed endpoints with the deployment platform's authentication and authorization controls.

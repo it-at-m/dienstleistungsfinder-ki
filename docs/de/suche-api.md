@@ -1,6 +1,6 @@
 # Suche und API
 
-Der Core stellt eine FastAPI-Anwendung bereit und kombiniert LangChain-Runnables für Query Enhancement, hybride Suche, optionales Reranking, Scrubbing und dokumentgebundene Antworten.
+Der Core stellt eine FastAPI-Anwendung bereit und kombiniert LangChain-Runnables für Query Enhancement, hybride Suche, optionales Reranking und dokumentgebundene Antworten.
 
 ## Suchkette
 
@@ -20,8 +20,7 @@ Der Core stellt eine FastAPI-Anwendung bereit und kombiniert LangChain-Runnables
 | GET     | `/api/healthz`          | Prozessstatus und Anwendungsversion                                  | Betrieb               |
 | GET     | `/api/keywords`         | Gültige Schlagwortfilter                                             | Frontend, MCP-Clients |
 | GET     | `/api/categories`       | Gültige Kategoriefilter                                              | Frontend, MCP-Clients |
-| GET     | `/api/config`           | Beispiele, Feedback-Vorlagen und Scrubber-Status                     | Frontend              |
-| POST    | `/api/scrub`            | Wahrscheinliche personenbezogene Daten entfernen und Run-ID erzeugen | Frontend, MCP-Clients |
+| GET     | `/api/config`           | Beispiele und Feedback-Vorlagen                     | Frontend              |
 | POST    | `/api/retrieval`        | Priorisierte Dienstleistungsdokumente abrufen                        | Frontend, MCP-Clients |
 | POST    | `/api/answer`           | Antwort aus einem ausgewählten Dokument erzeugen                     | Frontend              |
 | POST    | `/api/score`            | Binäres Feedback mit einem Langfuse-Trace verknüpfen                 | Frontend              |
@@ -31,7 +30,7 @@ Interaktive Swagger- und ReDoc-Oberflächen sind unter `/docs` und `/redoc` verf
 
 ## Typischer API-Ablauf
 
-Zunächst werden Dokumente gesucht. Wenn Scrubbing aktiviert ist, wird vorher `/api/scrub` aufgerufen:
+Zunächst werden Dokumente gesucht:
 
 ```bash
 curl -X POST http://localhost:8080/api/retrieval \
@@ -68,8 +67,10 @@ Mit `RERANK_OVERRIDE=true` können Betreibende den Wert des Frontends ignorieren
 
 - `422` kennzeichnet ungültige Anfrageformen oder unbekannte Filterwerte.
 - `404` bedeutet, dass das gewählte Dokument keine quellengebundene Antwort ermöglicht hat.
-- `501` bedeutet, dass Scrubbing angefordert, aber deaktiviert ist.
-- `504` bedeutet, dass der Scrubber sein Zeitlimit überschritten hat.
 - Verstöße gegen Inhaltsrichtlinien eines Modells werden in einen eindeutigen API-Fehler übersetzt.
 
-Das Session-Cookie gruppiert Browseraktivitäten; die `run_id` verbindet Scrub-, Retrieval-, Antwort- und Score-Aufrufe. Langfuse-Callbacks erfassen Kettenaktivität, Prompts, Laufzeiten und Nutzerfeedback. Rohdaten von Secrets und sensible Nutzereingaben dürfen nicht in eigene Log-Ausgaben aufgenommen werden.
+Das Session-Cookie gruppiert Browseraktivitäten; die `run_id` verbindet Retrieval-, Antwort- und Score-Aufrufe. Langfuse-Callbacks erfassen Kettenaktivität, Prompts, Laufzeiten und Nutzerfeedback. Rohdaten von Secrets und sensible Nutzereingaben dürfen nicht in eigene Log-Ausgaben aufgenommen werden.
+
+## MCP-Freigabe
+
+`MCP_ENDPOINTS` in `core/backend/app.py` legt die freigegebenen HTTP-Methoden und Pfade fest. Zunächst ist nur `POST /api/retrieval` freigegeben. Eine abschließende Ausschlussregel verhindert, dass weitere Endpunkte automatisch als MCP-Tools oder Ressourcen erscheinen. Für Antworten auf Basis der Dokumenttexte explizit `result="full"` angeben.

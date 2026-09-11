@@ -45,10 +45,8 @@ export const DEFAULT_EXAMPLES = [
 export const DEFAULT_FRONTEND_CONFIG = {
   feedback: DEFAULT_FEEDBACK_CONFIG,
   examples: DEFAULT_EXAMPLES,
-  scrubber_enabled: false,
 };
 //API
-export const SCRUBBER_ENDPOINT = "/api/scrub";
 export const RETRIEVAL_ENDPOINT = "/api/retrieval";
 export const ANSWER_ENDPOINT = "/api/answer";
 export const SCORE_ENDPOINT = "/api/score";

@@ -7,9 +7,54 @@ inject_into_ssl()
 load_dotenv()
 
 import argparse
+import re
+from contextlib import AsyncExitStack, asynccontextmanager
 
 import uvicorn
 from backend import backend
+from fastapi import FastAPI
+from fastmcp import FastMCP
+from fastmcp.server.providers.openapi import MCPType, RouteMap
+
+# Explicit method/path allowlist. All other endpoints remain HTTP-only.
+MCP_ENDPOINTS = (("POST", "/api/retrieval"),)
+
+
+@asynccontextmanager
+async def _combined_lifespan(app, backend_lifespan, mcp_lifespan):
+    async with AsyncExitStack() as stack:
+        await stack.enter_async_context(backend_lifespan(backend))
+        await stack.enter_async_context(mcp_lifespan(app))
+        yield
+
+
+def create_mcp():
+    return FastMCP.from_fastapi(
+        app=backend,
+        name="DLF MCP",
+        route_maps=[
+            *[RouteMap(methods=[method], pattern=f"^{re.escape(path)}$", mcp_type=MCPType.TOOL) for method, path in MCP_ENDPOINTS],
+            RouteMap(pattern=r".*", mcp_type=MCPType.EXCLUDE),
+        ],
+    )
+
+
+def create_app():
+    mcp = create_mcp()
+    mcp_app = mcp.http_app(path="/mcp", stateless_http=True)
+    app = FastAPI(
+        title="DLF Backend",
+        description="Backend for the DLF MCP",
+        version="0.1.0",
+        openapi_url="/openapi.json",
+        docs_url="/docs",
+        redoc_url="/redoc",
+        routes=[*mcp_app.routes, *backend.routes],
+        middleware=[*backend.user_middleware],
+        lifespan=lambda app: _combined_lifespan(app, backend.router.lifespan_context, mcp_app.lifespan),
+    )
+    return app
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -18,4 +63,6 @@ if __name__ == "__main__":
 
     host = "localhost" if args.development else "0.0.0.0"
 
-    uvicorn.run(backend, host=host, port=8080, log_config="logconf.yaml")
+    app = create_app()
+
+    uvicorn.run(app, host=host, port=8080, log_config="logconf.yaml")

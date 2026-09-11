@@ -6,7 +6,7 @@ from json import loads
 from logging import Logger
 from os import getenv
 from typing import Any, Literal
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 import numpy as np
 from auth import create_auth_enabled_static_files
@@ -29,17 +29,12 @@ from data_models import (
     RetrievalInput,
     RetrievalResult,
     ScoreInput,
-    ScrubberDisabledError,
-    ScrubberTimeoutError,
-    ScrubInput,
-    ScrubResult,
 )
 from envtools import getenv_with_exception
 from errors import (
     AnswerChainException,
     ContentFilterException,
     NoAnswerFoundException,
-    ScrubberDisabledException,
 )
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -94,7 +89,6 @@ LANGFUSE_HOST = getenv_with_exception("LANGFUSE_HOST")
 SESSION_MAX_AGE = int(getenv("DLF_SESSION_MAX_AGE", 18000))  # 5 Stunden
 ALLOWED_ORIGINS = getenv("DLF_ALLOWED_ORIGINS", "http://localhost:8080").split(",")
 ENABLE_DOCS = getenv("DLF_ENABLE_DOCS", "true").lower() == "true"
-SCRUBBER_ENABLED = getenv("SCRUBBER_ENABLED", "false").lower() == "true"  # Default is false
 FRONTEND_FEEDBACK_POSITIVE_MAIL_TO = getenv("FRONTEND_FEEDBACK_POSITIVE_MAIL_TO", "")
 FRONTEND_FEEDBACK_POSITIVE_SUBJECT = getenv("FRONTEND_FEEDBACK_POSITIVE_SUBJECT", "")
 FRONTEND_FEEDBACK_POSITIVE_BODY = getenv("FRONTEND_FEEDBACK_POSITIVE_BODY", "")
@@ -228,7 +222,7 @@ async def lifespan(app: FastAPI):
     context.reranker = Reranker()
 
     # Build chains and mount the routes
-    context.vectorstore, context.retriever, context.answer_chain, context.scrubber_chain = build_chains(
+    context.vectorstore, context.retriever, context.answer_chain = build_chains(
         answer_prompt_template=answer_prompt_template,
         query_prompt_template=query_prompt_template,
         prompt_temperature=prompt_temperature,
@@ -328,23 +322,6 @@ def _build_config(session_id: str, langfuse_handler: Callbacks | None, **kwargs)
     return config, kwargs
 
 
-# wrapper for the scrub chain for observability
-@observe(name="DLF", as_type="span")
-async def scrub_observer(query: str, session_id: str, **kwargs) -> ScrubResult:
-    assert context.scrubber_chain is not None, "Scrubber chain must be initialized before scrubbing."
-    assert context.langfuse is not None, "Langfuse must be initialized before scrubbing."
-
-    if context.langfuse_handler is None:
-        logger.warning("No Langfuse handler found in context")
-    config, kwargs = _build_config(session_id=session_id, langfuse_handler=context.langfuse_handler)  # type: ignore
-
-    with propagate_attributes(
-        session_id=session_id,
-    ):
-        chain_result: str = await context.scrubber_chain.ainvoke(input=query, config=config, **kwargs)
-    return ScrubResult(scrubbed_query=chain_result)
-
-
 # wrapper for the retrieval chain for observability
 @observe(name="DLF", as_type="span")
 async def retrieval_observer(
@@ -428,13 +405,8 @@ OPENAPI_DESCRIPTION = """
 DLF Backend exposes Munich service-finder search capabilities for applications
 and agentic tool use.
 
-Recommended MCP search workflow:
-1. Call `get_available_keywords` and `get_available_categories` only when you
-   want to offer or validate optional filters.
-2. Call `scrub_user_query` before retrieval when the scrubber is enabled and
-   the user query may contain names, addresses, or other personal data.
-3. Call `retrieve_munich_service_documents` with the user question and optional
-   filters to search the indexed Munich service documents.
+MCP exposes only explicitly configured endpoints; initially only retrieval.
+Call `retrieve_munich_service_documents` with a self-contained question.
 
 For a generic chatbot, expose the retrieval tool and request `result='full'`
 when the model should generate its own answer from returned document content.
@@ -541,10 +513,7 @@ def list_categories() -> list[str]:
     response_model_exclude_none=True,
     tags=["frontend"],
     summary="Get frontend runtime configuration",
-    description=(
-        "Returns UI configuration such as example prompts, feedback mail templates, and whether query scrubbing is enabled. "
-        "MCP clients can use `scrubber_enabled` to decide whether to call `scrub_user_query` before retrieval."
-    ),
+    description=("Returns UI configuration such as example prompts and feedback mail templates."),
     operation_id="get_frontend_config",
 )
 def config() -> FrontendConfig:
@@ -579,43 +548,8 @@ def config() -> FrontendConfig:
                 body=FRONTEND_FEEDBACK_NEGATIVE_BODY,
             ),
         ),
-        scrubber_enabled=SCRUBBER_ENABLED,
         examples=FRONTEND_EXAMPLES,
     )  # type: ignore
-
-
-# Scrubber route
-@backend.post(
-    "/api/scrub",
-    tags=["mcp", "frontend"],
-    summary="Remove personal data from a user query",
-    description=(
-        "Anonymizes likely personal data in a natural-language user question before retrieval. "
-        "Call this when `get_frontend_config.scrubber_enabled` is true or when the client wants a privacy-preserving query. "
-        "Pass the returned `scrubbed_query` to `retrieve_munich_service_documents.query` and keep the returned `run_id` for later retrieval and feedback correlation."
-    ),
-    operation_id="scrub_user_query",
-    responses={
-        501: {"model": ScrubberDisabledError, "description": "The scrubber is disabled for this deployment."},
-        504: {"model": ScrubberTimeoutError, "description": "The scrubber did not complete before the timeout."},
-    },
-)
-async def scrub(input: ScrubInput, request: Request) -> ScrubResult:
-    """Anonymize a user query and start a traceable run."""
-    if not SCRUBBER_ENABLED:
-        raise ScrubberDisabledException()
-    session_id: str = _get_session_id(request)
-
-    # generate new run id, independent of session id
-    run_id: UUID = uuid4()
-
-    scrubbed_query: ScrubResult = await scrub_observer(
-        query=input.query,
-        session_id=session_id,
-        langfuse_trace_id=run_id.hex,
-    )
-    scrubbed_query.run_id = run_id
-    return scrubbed_query
 
 
 # Retrieval chain route
@@ -624,12 +558,18 @@ async def scrub(input: ScrubInput, request: Request) -> ScrubResult:
     tags=["mcp", "frontend"],
     summary="Retrieve relevant information about Munich city services",
     description=(
-        "Core search endpoint for official information about services offered by the City of Munich. "
-        "Use this tool when the user asks about municipal services, administrative procedures, required documents or forms."
-        "Use `result='full'` by default when the assistant should answer the user based on the retrieved content. "
-        "Use `result='minimal'` only when the workflow needs compact metadata such as document IDs, collections, titles, and source URLs without page content. "
-        "The returned `enhanced_query` explains how the query was interpreted, but retrieval results are complete on their own. "
-        "Use exact keyword and category strings from `get_available_keywords` and `get_available_categories` when filtering."
+        "Search official City of Munich information about municipal services, eligibility, administrative procedures, "
+        "required documents, fees, deadlines, forms, and responsible offices. This is a read-only search: "
+        "it does not submit applications or book appointments. "
+        "Provide a self-contained natural-language question, resolving references from the conversation and including "
+        "relevant circumstances without unnecessary personal identifiers. "
+        "Explicitly set `result='full'` to receive document text for answering; the API default `minimal` only returns "
+        "document references and metadata. Leave `enhance_query=true` and `collections='all'` for general searches. "
+        "Omit keywords and categories unless you already know valid exact filter values; do not invent filters. "
+        "Use returned document content as evidence and cite the corresponding source URLs. "
+        "The `enhanced_query` describes the search interpretation, not an authoritative answer. "
+        "If results are empty or do not support the requested detail, say so and reformulate the search or ask for clarification. "
+        "Omit `run_id` for a new search; the response supplies one for subsequent feedback correlation."
     ),
     operation_id="retrieve_munich_service_documents",
     responses={
@@ -639,7 +579,7 @@ async def scrub(input: ScrubInput, request: Request) -> ScrubResult:
 async def retrieval(input: RetrievalInput, request: Request) -> RetrievalResult:
     """Find documents that may answer a Munich service question."""
     session_id = _get_session_id(request)
-    if input.run_id is None:  # if scrubber didn't run, create run id
+    if input.run_id is None:  # Create a trace identifier for a new search.
         input.run_id = uuid4()
 
     # check if keyword exists
