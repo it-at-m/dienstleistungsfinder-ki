@@ -9,6 +9,7 @@ export const ENABLE_ADVANCED_FILTERS: boolean = import.meta.env
   ? import.meta.env.VITE_ENABLE_ADVANCED_FILTERS !== "false"
   : false;
 
+/** Returns the configured API URL, or the current page origin by default. */
 export function getAPIBaseURL(): string {
   if (import.meta.env.VITE_VUE_APP_API_URL) {
     return import.meta.env.VITE_VUE_APP_API_URL;
@@ -45,10 +46,8 @@ export const DEFAULT_EXAMPLES = [
 export const DEFAULT_FRONTEND_CONFIG = {
   feedback: DEFAULT_FEEDBACK_CONFIG,
   examples: DEFAULT_EXAMPLES,
-  scrubber_enabled: false,
 };
 //API
-export const SCRUBBER_ENDPOINT = "/api/scrub";
 export const RETRIEVAL_ENDPOINT = "/api/retrieval";
 export const ANSWER_ENDPOINT = "/api/answer";
 export const SCORE_ENDPOINT = "/api/score";

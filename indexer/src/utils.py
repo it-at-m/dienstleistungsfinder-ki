@@ -19,6 +19,7 @@ logger = getLogger()
 # https://stamina.hynek.me/en/stable/api.html#module-stamina
 @retry(on=(HTTPError), attempts=3)
 def get_with_retry(client: Client, url: str, **kwargs) -> Response:
+    """Fetch a URL and raise for HTTP errors, retrying failures up to three times."""
     response = client.get(url, **kwargs)
     response.raise_for_status()
     return response

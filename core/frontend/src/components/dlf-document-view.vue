@@ -5,7 +5,7 @@ import MarkdownIt from "markdown-it";
 import { computed } from "vue";
 
 const markdown = new MarkdownIt({
-  html: true, // Erlaubt HTML im Markdown
+  html: false,
 });
 
 // Anpassen der Überschriften mit einem Plugin

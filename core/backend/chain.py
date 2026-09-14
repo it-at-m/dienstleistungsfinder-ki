@@ -23,7 +23,6 @@ from qdrant_client.models import FieldCondition, Fusion, FusionQuery, MatchAny
 from qdrant_client.models import Filter as QFilter
 from quote import process_quote
 from rerank import Reranker
-from scrubber import scrub_input
 
 logger: Logger = getLogger()
 NO_ANSWER_LLM_RESPONSE = "<ERR:NO_ANSWER>"
@@ -369,7 +368,7 @@ def build_chains(
     prompt_temperature: float | None = None,
     reranker: Reranker | None = None,
     stats_provider: Callable[[], dict[str, float | int]] | None = None,
-) -> tuple[dict[str, QdrantVectorStore], Runnable, Runnable[AnswerChainInput, AnswerResult], Runnable[str, str]]:
+) -> tuple[dict[str, QdrantVectorStore], Runnable, Runnable[AnswerChainInput, AnswerResult]]:
     """Builds and returns a retrieval chain for the DLF RAG app.
 
     Args:
@@ -377,7 +376,7 @@ def build_chains(
         prompt_temp (Optional[float]): The temperature value for generating prompts. Defaults to None.
 
     Returns:
-        tuple[VectorStore, VectorStoreRetriever, Runnable, Runnable]: A tuple containing the vectorstore, the retriever and answer chain, and the scrubber.
+        tuple: The vectorstores, retrieval chain, and answer chain.
 
     Corresponding Environment Variables:
         SYSTEM_PROMPT: The system prompt used for the chat model.
@@ -600,7 +599,6 @@ def build_chains(
 
     # expose a consistent variable name for return signature compatibility
     postprocess_answer_chain: Runnable[AnswerChainInput, AnswerResult] = answer_chain
-    scrubber_chain: Runnable[str, str] = RunnableLambda(scrub_input).with_config({"run_name": "SCRUBBER_CHAIN"})
 
     logger.info("Chains created successfully.")
-    return vectorstores, retriever_chain, postprocess_answer_chain, scrubber_chain
+    return vectorstores, retriever_chain, postprocess_answer_chain

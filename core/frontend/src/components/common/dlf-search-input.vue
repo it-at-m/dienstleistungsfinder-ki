@@ -105,10 +105,14 @@ type InputType =
 const modelValue = defineModel<string>({ default: "" });
 
 const {
-  errorMsg,
+  errorMsg = "",
   required = false,
   type = "text",
   dataList = [] as string[],
+  placeholder = "",
+  label = "",
+  hint = "",
+  suffixIcon = "",
 } = defineProps<{
   /**
    *  Unique identifier for the input. Required property used to associate the input with its label and hint text for accessibility.

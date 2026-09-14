@@ -30,6 +30,7 @@ dependencies = [
     "pyyaml==6.0.3",
     "aiosmtplib==5.1.2",
     "cohere==7.1.0",
+    "fastmcp>=4.0.3",
 ]
 
 [dependency-groups]

@@ -312,6 +312,7 @@ def add_site_visits_to_qdrant_collection(
 
 
 def add_site_visits_main() -> None:
+    """Enrich service and information collections with configured eTracker visit counts."""
     if not ETRACKER_BASE_URL or not ETRACKER_TOKEN:
         logger.info("Etracker enrichment skipped because ETRACKER_URL_BASE or ETRACKER_TOKEN is not configured.")
         return

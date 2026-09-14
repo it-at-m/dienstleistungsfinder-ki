@@ -20,6 +20,7 @@ logger = getLogger()
 
 @retry(on=TimeoutException, attempts=3)
 def call_with_retry(client: Client, url: str) -> Response:
+    """Fetch a URL, retrying timeout failures up to three times."""
     response = client.get(url)
     return response
 

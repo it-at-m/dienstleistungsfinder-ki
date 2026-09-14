@@ -34,24 +34,6 @@ class NoAnswerFoundException(HTTPException):
         super().__init__(self.status_code, self.detail)
 
 
-class ScrubberDisabledException(HTTPException):
-    """Exception raised when the scrubber is disabled."""
-
-    def __init__(self):
-        self.status_code = 501
-        self.detail = "Scrubber is disabled."
-        super().__init__(self.status_code, self.detail)
-
-
-class ScrubberTimeoutException(HTTPException):
-    """Exception raised when the scrubber request times out."""
-
-    def __init__(self):
-        self.status_code = 504
-        self.detail = "Scrubber request timed out."
-        super().__init__(self.status_code, self.detail)
-
-
 class ContentFilterException(HTTPException):
     """
     Exception raised when the language model API triggers a content filter.

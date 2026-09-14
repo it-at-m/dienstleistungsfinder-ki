@@ -165,6 +165,7 @@ def extract_text_markdown(node: "JcrNode", include_headings: bool = True, includ
 
 
 def main():
+    """Fetch Magnolia articles and print parsed document metadata for inspection."""
     fetched_articles: SearchResponse = _fetch_articles()
     docs: list[Document] = [_magnolia_article_to_doc(article) for article in fetched_articles.results]
     print(len(docs), "Magnolia documents fetched and parsed.")

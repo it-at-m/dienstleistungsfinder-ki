@@ -256,6 +256,7 @@ def _upsert_batch(vectorstore: QdrantVectorStore, batch: list[Document], **kwarg
 
 
 def load(collection_documents: dict[str, list[Document]]) -> None:
+    """Create or update Qdrant collections from the supplied documents."""
     logger.info("Load operation started with %d configured collections", len(collection_documents))
 
     if not collection_documents:

@@ -8,7 +8,7 @@ The Vue frontend is distributed as the standard custom element `<dlf-search-webc
 
 At mount time the component loads:
 
-- runtime feedback, example, and scrubber configuration from `/api/config`;
+- runtime feedback and example configuration from `/api/config`;
 - available filter values from `/api/keywords` and `/api/categories`.
 
 A search can start from text, keyword filters, category filters, or a combination. `AbortController` cancels an in-flight request when a newer search begins. After retrieval, answer requests run per candidate and results appear incrementally.

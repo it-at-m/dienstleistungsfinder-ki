@@ -113,6 +113,7 @@ def build_collection_documents() -> dict[str, list[Document]]:
 
 
 def main() -> int:
+    """Run indexing and optional site-visit enrichment, returning an exit status."""
     # chech qdrant connection at the start to avoid late failures
     qdrant_url = getenv("QDRANT_URL")
     key = getenv("QDRANT_API_KEY")

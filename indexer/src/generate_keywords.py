@@ -46,6 +46,7 @@ def make_keyword_chain(
     model_name: str,
     temperature: float = 0.2,
 ):
+    """Build the structured-output chain used to generate article keywords."""
     llm = ChatOpenAI(model=model_name, temperature=temperature).with_structured_output(KeywordResult)
     return KEYWORD_PROMPT | llm
 

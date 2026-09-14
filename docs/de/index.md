@@ -31,20 +31,19 @@ Dienstleistungsfinder KI ist eine Retrieval-Augmented-Generation-Anwendung (RAG)
 
 Das Monorepository veröffentlicht zwei unabhängig versionierte Anwendungen:
 
-| Anwendung | Verzeichnis | Aufgabe                                                                                                  |
-| --------- | ----------- | -------------------------------------------------------------------------------------------------------- |
-| Core      | `core/`     | Vue Web Component, FastAPI-API, Retrieval- und Antwortketten sowie Auslieferung statischer Dateien       |
-| Indexer   | `indexer/`  | Sammlung, Normalisierung, Embedding, Qdrant-Indizierung und optionale Anreicherung mit Popularitätsdaten |
+| Anwendung | Verzeichnis | Aufgabe                                                                                                                  |
+| --------- | ----------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Core      | `core/`     | Vue Web Component, FastAPI-API, integriertes FastMCP, Retrieval- und Antwortketten sowie Auslieferung statischer Dateien |
+| Indexer   | `indexer/`  | Sammlung, Normalisierung, Embedding, Qdrant-Indizierung und optionale Anreicherung mit Popularitätsdaten                 |
 
-Qdrant bildet die gemeinsame Schnittstelle: Der Indexer schreibt Collections, der Core liest sie. Dadurch kann die Indizierung als geplanter Job laufen, ohne an den nutzerseitigen Anfrageverkehr gekoppelt zu sein.
+Qdrant bildet die gemeinsame Schnittstelle zwischen Indexer und Core: Der Indexer schreibt Collections, der Core liest sie. FastMCP läuft innerhalb des Core und stellt dessen Retrieval-Endpunkt für Agenten bereit. Dadurch kann die Indizierung als geplanter Job laufen, ohne an den nutzerseitigen Anfrageverkehr gekoppelt zu sein.
 
 ## Anfrage von Anfang bis Ende
 
 1. Eine Person stellt im Web Component eine Frage.
-2. Das Frontend lässt personenbezogene Angaben optional durch das Backend entfernen.
-3. Das Backend erweitert die Suchanfrage, führt eine hybride Suche aus und sortiert Kandidaten optional neu.
-4. Das Frontend fordert für jedes gefundene Dokument eine quellengebundene Antwort an und zeigt Ergebnisse fortlaufend an.
-5. Positive oder negative Rückmeldungen werden dem Trace in Langfuse zugeordnet.
+2. Das Backend erweitert die Suchanfrage, führt eine hybride Suche aus und sortiert Kandidaten optional neu.
+3. Das Frontend fordert für jedes gefundene Dokument eine quellengebundene Antwort an und zeigt Ergebnisse fortlaufend an.
+4. Positive oder negative Rückmeldungen werden dem Trace in Langfuse zugeordnet.
 
 <img class="diagram light-only" src="../graphics/dlf_rag.png" alt="Gesamtablauf von der Frage über die hybride Suche bis zur Antwortgenerierung">
 <img class="diagram dark-only" src="../graphics/dlf_rag_dark.png" alt="Gesamtablauf von der Frage über die hybride Suche bis zur Antwortgenerierung">
@@ -55,6 +54,7 @@ Qdrant bildet die gemeinsame Schnittstelle: Der Indexer schreibt Collections, de
 - [Lokale Entwicklung](./lokale-entwicklung) beschreibt Voraussetzungen, Konfiguration, Start und Prüfungen.
 - [Indizierungspipeline](./indexing-pipeline) verfolgt Inhalte von den Quellsystemen bis Qdrant.
 - [Suche und API](./suche-api) dokumentiert Laufzeitketten, Endpunkte, Anfragefluss und Fehler.
+- [MCP-Server](./mcp-server) beschreibt Agentenanbindung, Endpunktkonfiguration und Bereitstellung im Core.
 - [Frontend und Bereitstellung](./frontend-bereitstellung) behandelt Web Component, Container-Build, CI und Releases.
 
 ::: tip Geltungsbereich
