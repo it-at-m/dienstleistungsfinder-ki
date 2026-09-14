@@ -33,7 +33,20 @@ Dienstleistungsartikel werden aus strukturierten Feldern und eingebettetem HTML 
 
 Stabile IDs sind die Grundlage inkrementeller Aktualisierungen und sorgen bei wiederholten Läufen für eine gleichbleibende Dokumentidentität.
 
-### 4. Embeddings erzeugen und laden
+### 4. Öffentliche Datensätze exportieren (optional)
+
+Wenn `HF_DATASET_EXPORT_ENABLED=true` gesetzt ist, exportiert der Indexer transformierte Dokumente vor der Embedding-Erzeugung und dem Laden in Qdrant. Das Token in `HF_TOKEN` benötigt Schreibzugriff auf beide vorhandenen öffentlichen Datensatz-Repositories:
+
+| Collection | Datensatz-Repository           |
+| ---------- | ------------------------------ |
+| `service`  | `it-at-m/munich-city-services` |
+| `info`     | `it-at-m/munich-city-info`     |
+
+Jeder Export ersetzt den Split `train` der Konfiguration `default`. Exportiert werden Dokumentmetadaten, eine stabile `document_id` und Markdown-Inhalt in `content`. Dichte Embeddings, Sparse-Vektoren und vektorförmige Metadaten werden ausdrücklich ausgeschlossen. Schlägt ein aktivierter Export fehl, endet der Lauf, bevor Qdrant verändert wird.
+
+Die Repositories und ihre Dataset Cards werden separat mit der Hugging-Face-CLI eingerichtet. Der einmalige Ablauf, erforderliche Berechtigungen und die Lizenz CC BY 4.0 sind in [`indexer/HUGGINGFACE_SETUP.md`](../../indexer/HUGGINGFACE_SETUP.md) beschrieben.
+
+### 5. Embeddings erzeugen und laden
 
 Jedes Dokument erhält:
 
@@ -45,22 +58,24 @@ Vor dem Schreiben in eine vorhandene Collection legt der Loader einen Snapshot a
 
 Mit `VDB_DEL_COLLECTION=true` wird die vorhandene Collection vollständig ersetzt. Der standardmäßige inkrementelle Modus ist sicherer und verhindert, dass unveränderte Inhalte erneut eingebettet werden.
 
-### 5. Popularitätsdaten ergänzen
+### 6. Popularitätsdaten ergänzen
 
 Sind `ETRACKER_URL_BASE` und `ETRACKER_TOKEN` gesetzt, verknüpft die letzte Stufe Besuchszahlen mit indizierten URLs und aktualisiert Qdrant-Payloads. Der authentifizierte Abruf von Dienstleistungs-IDs verwendet `API_AUTH_USER` und `API_AUTH_PASS`. Ohne das Analytics-Paar wird die Anreicherung protokolliert übersprungen und der Indizierungslauf nicht als fehlgeschlagen bewertet.
 
 ## Wesentliche Konfiguration
 
-| Variable                   | Standard       | Bedeutung                                         |
-| -------------------------- | -------------- | ------------------------------------------------- |
-| `VDB_COLLECTIONS`          | `service,info` | Builder und Ziel-Collections                      |
-| `OPENAI_EMBEDDING_MODEL`   | keiner         | Erforderliches dichtes Embedding-Modell           |
-| `EMB_SPARSE_MODEL`         | `Qdrant/bm25`  | Sparse-Embedding-Modell                           |
-| `VDB_DENSE_VECTOR_NAME`    | `dense`        | Name des dichten Vektors in Qdrant                |
-| `VDB_SPARSE_VECTOR_NAME`   | `sparse`       | Name des Sparse-Vektors in Qdrant                 |
-| `VDB_BATCH_SIZE`           | `25`           | Dokumente pro Upsert-Batch                        |
-| `VDB_MAX_SNAPSHOTS`        | `10`           | Aufbewahrte Snapshots je Collection               |
-| `DLF_INDEXER_MIN_ARTICLES` | `800`          | Mindestanzahl akzeptierter Dienstleistungsartikel |
+| Variable                    | Standard       | Bedeutung                                                                |
+| --------------------------- | -------------- | ------------------------------------------------------------------------ |
+| `VDB_COLLECTIONS`           | `service,info` | Builder und Ziel-Collections                                             |
+| `OPENAI_EMBEDDING_MODEL`    | keiner         | Erforderliches dichtes Embedding-Modell                                  |
+| `EMB_SPARSE_MODEL`          | `Qdrant/bm25`  | Sparse-Embedding-Modell                                                  |
+| `VDB_DENSE_VECTOR_NAME`     | `dense`        | Name des dichten Vektors in Qdrant                                       |
+| `VDB_SPARSE_VECTOR_NAME`    | `sparse`       | Name des Sparse-Vektors in Qdrant                                        |
+| `VDB_BATCH_SIZE`            | `25`           | Dokumente pro Upsert-Batch                                               |
+| `VDB_MAX_SNAPSHOTS`         | `10`           | Aufbewahrte Snapshots je Collection                                      |
+| `DLF_INDEXER_MIN_ARTICLES`  | `800`          | Mindestanzahl akzeptierter Dienstleistungsartikel                        |
+| `HF_DATASET_EXPORT_ENABLED` | `false`        | Transformierte Dokumente vor dem Embedding nach Hugging Face exportieren |
+| `HF_TOKEN`                  | keiner         | Token mit Schreibzugriff auf beide Datensatz-Repositories                |
 
 ## Fehlerverhalten und Wiederherstellung
 

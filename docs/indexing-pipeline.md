@@ -33,7 +33,20 @@ Service articles are converted from structured fields and embedded HTML into Mar
 
 Stable IDs are central to incremental updates and make repeated runs idempotent at the document identity level.
 
-### 4. Embed and load
+### 4. Export public datasets (optional)
+
+When `HF_DATASET_EXPORT_ENABLED=true`, the indexer exports transformed documents before embedding or Qdrant loading. A token in `HF_TOKEN` must have write access to both existing public dataset repositories:
+
+| Collection | Dataset repository             |
+| ---------- | ------------------------------ |
+| `service`  | `it-at-m/munich-city-services` |
+| `info`     | `it-at-m/munich-city-info`     |
+
+Each export replaces the `default` configuration's `train` split. It publishes document metadata, a stable `document_id`, and Markdown `content`. Dense embeddings, sparse vectors, and vector-shaped metadata are explicitly excluded. A failed enabled export stops the run before Qdrant is modified.
+
+The repositories and their dataset cards are provisioned separately with the Hugging Face CLI. See [`indexer/HUGGINGFACE_SETUP.md`](../indexer/HUGGINGFACE_SETUP.md) for the one-time process, required permissions, and CC BY 4.0 license.
+
+### 5. Embed and load
 
 Each document receives:
 
@@ -45,22 +58,24 @@ Before writing an existing collection, the loader creates a snapshot and prunes 
 
 Setting `VDB_DEL_COLLECTION=true` replaces the existing collection. The default incremental mode is safer and avoids embedding unchanged content.
 
-### 5. Enrich popularity
+### 6. Enrich popularity
 
 When both `ETRACKER_URL_BASE` and `ETRACKER_TOKEN` are configured, the final stage joins analytics visits to indexed URLs and updates Qdrant payloads. Authenticated service-ID retrieval uses `API_AUTH_USER` and `API_AUTH_PASS`. Without the analytics pair, enrichment is logged as skipped rather than failing the indexing run.
 
 ## Essential configuration
 
-| Variable                   | Default        | Meaning                                |
-| -------------------------- | -------------- | -------------------------------------- |
-| `VDB_COLLECTIONS`          | `service,info` | Builders and target collection names   |
-| `OPENAI_EMBEDDING_MODEL`   | none           | Required dense embedding model         |
-| `EMB_SPARSE_MODEL`         | `Qdrant/bm25`  | Sparse embedding model                 |
-| `VDB_DENSE_VECTOR_NAME`    | `dense`        | Dense vector slot in Qdrant            |
-| `VDB_SPARSE_VECTOR_NAME`   | `sparse`       | Sparse vector slot in Qdrant           |
-| `VDB_BATCH_SIZE`           | `25`           | Documents per upsert batch             |
-| `VDB_MAX_SNAPSHOTS`        | `10`           | Snapshots retained per collection      |
-| `DLF_INDEXER_MIN_ARTICLES` | `800`          | Minimum accepted service-article count |
+| Variable                    | Default        | Meaning                                                       |
+| --------------------------- | -------------- | ------------------------------------------------------------- |
+| `VDB_COLLECTIONS`           | `service,info` | Builders and target collection names                          |
+| `OPENAI_EMBEDDING_MODEL`    | none           | Required dense embedding model                                |
+| `EMB_SPARSE_MODEL`          | `Qdrant/bm25`  | Sparse embedding model                                        |
+| `VDB_DENSE_VECTOR_NAME`     | `dense`        | Dense vector slot in Qdrant                                   |
+| `VDB_SPARSE_VECTOR_NAME`    | `sparse`       | Sparse vector slot in Qdrant                                  |
+| `VDB_BATCH_SIZE`            | `25`           | Documents per upsert batch                                    |
+| `VDB_MAX_SNAPSHOTS`         | `10`           | Snapshots retained per collection                             |
+| `DLF_INDEXER_MIN_ARTICLES`  | `800`          | Minimum accepted service-article count                        |
+| `HF_DATASET_EXPORT_ENABLED` | `false`        | Export transformed documents to Hugging Face before embedding |
+| `HF_TOKEN`                  | none           | Token with write access to both dataset repositories          |
 
 ## Failure behavior and recovery
 
