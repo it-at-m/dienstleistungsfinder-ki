@@ -26,7 +26,7 @@ Browser ──► Vue Web Component ──► FastAPI ──► hybride Suche �
 MCP-Client ──► Core /mcp (FastMCP) ──► Core-Retrieval-Kette
 ```
 
-Der Core erzeugt seinen FastMCP-Server aus der FastAPI-Anwendung. Die Positivliste `MCP_ENDPOINTS` gibt ausschließlich `POST /api/retrieval` als schreibgeschütztes Suchwerkzeug frei. MCP- und HTTP-Anfragen nutzen denselben Backend-Lebenszyklus und dieselbe Retrieval-Implementierung.
+Standardmäßig erzeugt der Core seinen FastMCP-Server aus der FastAPI-Anwendung. Die Positivliste `MCP_ENDPOINTS` gibt ausschließlich `POST /api/retrieval` als schreibgeschütztes Suchwerkzeug frei. MCP- und HTTP-Anfragen nutzen denselben Backend-Lebenszyklus und dieselbe Retrieval-Implementierung.
 
 Die Collection `service` enthält strukturierte Dienstleistungsartikel. `info` enthält Magnolia-Informationsseiten. `VDB_COLLECTIONS` steuert, welche Builder der Indexer ausführt und welche Collections das Backend öffnet.
 

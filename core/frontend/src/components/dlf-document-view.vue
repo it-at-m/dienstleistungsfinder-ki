@@ -1,12 +1,11 @@
 <script setup lang="ts">
-/* eslint-disable vue/no-v-html */
 import type DLFAnswer from "@/types/DLFAnswer";
 
 import MarkdownIt from "markdown-it";
 import { computed } from "vue";
 
 const markdown = new MarkdownIt({
-  html: true, // Erlaubt HTML im Markdown
+  html: false,
 });
 
 // Anpassen der Überschriften mit einem Plugin
@@ -36,9 +35,6 @@ const props = defineProps<{
   showOrginalText: boolean;
 }>();
 
-// Render markdown to HTML. The input comes from the backend and is
-// processed via MarkdownIt with controlled options; this HTML is then
-// injected via v-html below.
 const genMarkdown = (text: string) => {
   return markdown.render(text);
 };
@@ -69,20 +65,12 @@ const ai_response = computed(() =>
           >{{ dlfDoc.doc_base_name }}</a
         >
       </h3>
-      <!--
-        Intentionally rendering trusted markdown output as HTML.
-        eslint-disable-next-line vue/no-v-html
-      -->
       <div
         v-if="showOrginalText"
         class="marked_text m-dataset-item__text"
         aria-label="Zitat relevanter Text"
         v-html="text"
       />
-      <!--
-        Intentionally rendering AI response markdown output as HTML.
-        eslint-disable-next-line vue/no-v-html
-      -->
       <div
         v-else
         class="ai_response"

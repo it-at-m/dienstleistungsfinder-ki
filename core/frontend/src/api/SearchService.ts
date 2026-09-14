@@ -28,7 +28,7 @@ export default class SearchService {
   static retrieval(
     input: RetrievalInput,
     signal: AbortSignal
-  ): Promise<RetrievalResult | undefined> {
+  ): Promise<RetrievalResult> {
     return fetch(`${getAPIBaseURL()}${RETRIEVAL_ENDPOINT}`, {
       method: "POST",
       signal: signal,
@@ -37,11 +37,34 @@ export default class SearchService {
         "Content-Type": "application/json", // Set the content type header
       },
     }).then((response) => {
-      if (response.status !== 200) {
-        Promise.reject(
-          "Retrieval in den Dokumenten konnte nicht durchgeführt werden"
-        );
-      } else return response.json() as unknown as RetrievalResult;
+      if (response.status === 200)
+        return response.json() as unknown as RetrievalResult;
+
+      if (response.status === 422) {
+        return response.json().then((error) => {
+          const detail = error["detail"];
+          const validationError = Array.isArray(detail) ? detail[0] : undefined;
+          if (validationError?.["type"] === QUERY_LENGTH_LIMIT_ERROR_TYPE) {
+            const message = validationError["msg"];
+            const match = typeof message === "string" ? message.match(/\d+/) : null;
+            const limit = match ? parseInt(match[0], 10) : undefined;
+            return Promise.reject(
+              limit
+                ? `Die Anfrage ist zu lang. Die maximale Länge beträgt ${limit} Zeichen.`
+                : "Die Anfrage ist zu lang."
+            );
+          }
+          return Promise.reject(
+            typeof detail === "string"
+              ? detail
+              : "Die Anfrage enthält ungültige Filterwerte."
+          );
+        });
+      }
+
+      return Promise.reject(
+        "Retrieval in den Dokumenten konnte nicht durchgeführt werden"
+      );
     });
   }
 
