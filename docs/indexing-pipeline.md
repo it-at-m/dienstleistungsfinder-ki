@@ -37,10 +37,10 @@ Stable IDs are central to incremental updates and make repeated runs idempotent 
 
 When `HF_DATASET_EXPORT_ENABLED=true`, the indexer exports transformed documents before embedding or Qdrant loading. A token in `HF_TOKEN` must have write access to both existing public dataset repositories:
 
-| Collection | Dataset repository |
-| ---------- | ------------------ |
+| Collection | Dataset repository             |
+| ---------- | ------------------------------ |
 | `service`  | `it-at-m/munich-city-services` |
-| `info`     | `it-at-m/munich-city-info` |
+| `info`     | `it-at-m/munich-city-info`     |
 
 Each export replaces the `default` configuration's `train` split. It publishes document metadata, a stable `document_id`, and Markdown `content`. Dense embeddings, sparse vectors, and vector-shaped metadata are explicitly excluded. A failed enabled export stops the run before Qdrant is modified.
 
@@ -64,18 +64,18 @@ When both `ETRACKER_URL_BASE` and `ETRACKER_TOKEN` are configured, the final sta
 
 ## Essential configuration
 
-| Variable                   | Default        | Meaning                                |
-| -------------------------- | -------------- | -------------------------------------- |
-| `VDB_COLLECTIONS`          | `service,info` | Builders and target collection names   |
-| `OPENAI_EMBEDDING_MODEL`   | none           | Required dense embedding model         |
-| `EMB_SPARSE_MODEL`         | `Qdrant/bm25`  | Sparse embedding model                 |
-| `VDB_DENSE_VECTOR_NAME`    | `dense`        | Dense vector slot in Qdrant            |
-| `VDB_SPARSE_VECTOR_NAME`   | `sparse`       | Sparse vector slot in Qdrant           |
-| `VDB_BATCH_SIZE`           | `25`           | Documents per upsert batch             |
-| `VDB_MAX_SNAPSHOTS`        | `10`           | Snapshots retained per collection      |
-| `DLF_INDEXER_MIN_ARTICLES` | `800`          | Minimum accepted service-article count |
-| `HF_DATASET_EXPORT_ENABLED` | `false`       | Export transformed documents to Hugging Face before embedding |
-| `HF_TOKEN`                 | none           | Token with write access to both dataset repositories |
+| Variable                    | Default        | Meaning                                                       |
+| --------------------------- | -------------- | ------------------------------------------------------------- |
+| `VDB_COLLECTIONS`           | `service,info` | Builders and target collection names                          |
+| `OPENAI_EMBEDDING_MODEL`    | none           | Required dense embedding model                                |
+| `EMB_SPARSE_MODEL`          | `Qdrant/bm25`  | Sparse embedding model                                        |
+| `VDB_DENSE_VECTOR_NAME`     | `dense`        | Dense vector slot in Qdrant                                   |
+| `VDB_SPARSE_VECTOR_NAME`    | `sparse`       | Sparse vector slot in Qdrant                                  |
+| `VDB_BATCH_SIZE`            | `25`           | Documents per upsert batch                                    |
+| `VDB_MAX_SNAPSHOTS`         | `10`           | Snapshots retained per collection                             |
+| `DLF_INDEXER_MIN_ARTICLES`  | `800`          | Minimum accepted service-article count                        |
+| `HF_DATASET_EXPORT_ENABLED` | `false`        | Export transformed documents to Hugging Face before embedding |
+| `HF_TOKEN`                  | none           | Token with write access to both dataset repositories          |
 
 ## Failure behavior and recovery
 
