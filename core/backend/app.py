@@ -27,6 +27,7 @@ async def _combined_lifespan(app, backend_lifespan, mcp_lifespan):
 
 
 def create_mcp():
+    """Create an MCP server exposing the configured backend API operations."""
     endpoints = get_mcp_endpoints()
     paths = backend.openapi()["paths"]
     for method, path in endpoints:
@@ -43,6 +44,7 @@ def create_mcp():
 
 
 def create_app():
+    """Create the FastAPI application with the backend and MCP routes."""
     mcp = create_mcp()
     mcp_app = mcp.http_app(path="/mcp", stateless_http=True)
     app = FastAPI(

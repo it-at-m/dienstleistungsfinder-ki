@@ -73,6 +73,7 @@ class DetailedArticle(BaseModel):
 
     @field_validator("language", mode="after")
     def validate_language(cls, input: str) -> str:
+        """Normalize supported source-language labels to ISO language codes."""
         if input in ["en", "de"]:
             return input
         elif input in ["Bürgerservice", "Rathaus"]:

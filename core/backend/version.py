@@ -8,6 +8,7 @@ logger: Logger = getLogger()
 
 
 def get_version() -> str:
+    """Return the application version from Git, a version file, or the environment."""
     if version := _get_git_version():
         logger.info(f"Version {version} (from git)")
         return version

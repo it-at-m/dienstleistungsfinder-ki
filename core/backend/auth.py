@@ -24,6 +24,7 @@ class AuthStaticFiles(StaticFiles):
         await super().__call__(scope, receive, send)
 
     async def authenticate(self, request: Request) -> None:
+        """Require valid basic-auth credentials for frontend entry points when configured."""
         if AUTH_USERNAME is None or AUTH_PASSWORD is None:
             return  # No authentication required
         if request.url.path not in ["/", "/index.html"]:

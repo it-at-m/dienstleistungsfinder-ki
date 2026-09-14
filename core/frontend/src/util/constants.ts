@@ -9,6 +9,7 @@ export const ENABLE_ADVANCED_FILTERS: boolean = import.meta.env
   ? import.meta.env.VITE_ENABLE_ADVANCED_FILTERS !== "false"
   : false;
 
+/** Returns the configured API URL, or the current page origin by default. */
 export function getAPIBaseURL(): string {
   if (import.meta.env.VITE_VUE_APP_API_URL) {
     return import.meta.env.VITE_VUE_APP_API_URL;

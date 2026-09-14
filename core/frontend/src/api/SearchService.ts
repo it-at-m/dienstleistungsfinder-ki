@@ -25,6 +25,7 @@ class ContentFilterException extends Error {
  * Service class for performing search operations against the backend API.
  */
 export default class SearchService {
+  /** Retrieves documents matching the supplied search input. */
   static retrieval(
     input: RetrievalInput,
     signal: AbortSignal
@@ -46,7 +47,8 @@ export default class SearchService {
           const validationError = Array.isArray(detail) ? detail[0] : undefined;
           if (validationError?.["type"] === QUERY_LENGTH_LIMIT_ERROR_TYPE) {
             const message = validationError["msg"];
-            const match = typeof message === "string" ? message.match(/\d+/) : null;
+            const match =
+              typeof message === "string" ? message.match(/\d+/) : null;
             const limit = match ? parseInt(match[0], 10) : undefined;
             return Promise.reject(
               limit
@@ -68,6 +70,7 @@ export default class SearchService {
     });
   }
 
+  /** Submits a user's relevance score for a completed search run. */
   static score(input: {
     value: boolean;
     run_id: string;
@@ -85,6 +88,7 @@ export default class SearchService {
     });
   }
 
+  /** Generates an answer for one retrieved document. */
   static answer(
     input: AnswerInput,
     signal: AbortSignal

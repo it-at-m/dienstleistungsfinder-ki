@@ -337,6 +337,7 @@ async def retrieval_observer(
     easy_language: bool = False,
     **kwargs,
 ) -> tuple[list[RetrievalDocument], EnhancedQuery | str]:
+    """Run retrieval with Langfuse observability and build the API response payload."""
     assert context.retriever is not None, "Retriever must be initialized before retrieval."
     assert context.langfuse is not None, "Langfuse must be initialized before retrieval."
     assert context.langfuse_handler is not None, "Langchain handler must be initialized before retrieval."
@@ -369,6 +370,7 @@ async def retrieval_observer(
 # wrapper for answer chain for observability
 @observe(name="DLF", as_type="span")
 async def answer_observer(input: AnswerInput, session_id: str, **kwargs) -> AnswerResult:
+    """Generate a document-grounded answer with Langfuse observability."""
     assert context.vectorstore is not None, "Vectorstore must be initialized before answering."
     assert context.langfuse is not None, "Langfuse must be initialized before answering."
     assert context.langfuse_handler is not None, "Langchain handler must be initialized before answering."
@@ -708,6 +710,7 @@ async def score(input: ScoreInput, request: Request) -> None:
     operation_id="get_popularity_stats",
 )
 def popularity_stats() -> dict:
+    """Return the current retrieval popularity-boost diagnostics."""
     return {
         "enabled": POPULARITY_ENABLED,
         "field": POPULARITY_PAYLOAD_FIELD,

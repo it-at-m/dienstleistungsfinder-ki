@@ -10,6 +10,7 @@ import {
  * Service class for getting frontend config
  */
 export default class ConfigService {
+  /** Fetches frontend configuration, falling back to built-in defaults for non-200 responses. */
   static async get(): Promise<FrontendConfig> {
     const response = await fetch(`${getAPIBaseURL()}${CONFIG_ENDPOINT}`, {
       method: "GET",

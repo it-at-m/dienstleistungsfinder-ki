@@ -19,6 +19,7 @@ logger = getLogger()
 # https://stamina.hynek.me/en/stable/api.html#module-stamina
 @retry(on=(HTTPError), attempts=3)
 def get_with_retry(client: Client, url: str, **kwargs) -> Response:
+    """Fetch a URL and raise for HTTP errors, retrying failures up to three times."""
     response = client.get(url, **kwargs)
     response.raise_for_status()
     return response
@@ -125,13 +126,10 @@ def build_collection_content_hash_map(qdrant_client: QdrantClient, collection: s
 
         for point in points:
             payload: dict[str, Any] = point.payload or {}
-            point_id = point.id # same id that is created for each document, i.e. document.id == point.id
+            point_id = point.id  # same id that is created for each document, i.e. document.id == point.id
             content = payload.get("page_content")
             if point_id is not None and content is not None:
                 content_hash = _hash_content(_normalize_content(content))
                 content_hash_map[str(point_id)] = content_hash
 
     return content_hash_map
-
-
-
