@@ -13,6 +13,7 @@ from truststore import inject_into_ssl
 from src.collect_and_extract_info import _fetch_articles, _magnolia_article_to_doc
 from src.collect_and_extract_service import collect_and_extract
 from src.data_models import SearchResponse
+from src.export_dataset_to_hf import export_datasets
 from src.load import load
 from src.logtools import getLogger
 from src.site_visits import add_site_visits_main
@@ -130,6 +131,7 @@ def main() -> int:
         return 3
 
     collection_documents = build_collection_documents()
+    export_datasets(collection_documents)
     load(collection_documents)
     add_site_visits_main()
     logger.info("Indexing process completed successfully.")

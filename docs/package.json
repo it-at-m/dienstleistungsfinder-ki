@@ -7,7 +7,8 @@
     "docs:build": "vitepress build .",
     "docs:preview": "vitepress preview .",
     "build": "vitepress build .",
-    "lint": "prettier --check . && markdownlint '**/*.md' --ignore node_modules"
+    "lint": "prettier --check . && markdownlint '**/*.md' --ignore node_modules",
+    "fix": "prettier --write ."
   },
   "devDependencies": {
     "markdownlint-cli": "^0.49.1",
