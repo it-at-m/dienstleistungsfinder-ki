@@ -13,7 +13,7 @@ maintainers = [
     { name = "Sebastian Berger", email = "sebastian.berger@muenchen.de" },
     { name = "Fabian Reinold", email = "fabian.reinold@muenchen.de" },
 ]
-requires-python = "==3.13.11"
+requires-python = "==3.15.1"
 dependencies = [
     "fastapi==0.141.1",
     "gitpython==3.1.60",
