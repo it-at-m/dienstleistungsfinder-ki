@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi10/nodejs-24:latest@sha256:c5144c868c86de73c9a56322ec787fd838f6ae811f3df917bfef8d33637ed9f1 AS frontend
+FROM registry.access.redhat.com/ubi10/nodejs-24:latest@sha256:881f7b8acbf0e131a9d0cb134e3e001be8d64eae4926f0a5d4147339c2ab5c6c AS frontend
 WORKDIR /build
 COPY frontend/ .
 USER root
@@ -8,11 +8,11 @@ RUN mkdir -p /build/dist/assets \
 USER 1001
 RUN npm ci && npm run build
 
-FROM registry.access.redhat.com/ubi10/ubi-minimal:latest@sha256:5a1acbfad56de537f978184e662a02ba8141d82a3ce0d2aca183bfad812b0ea7
+FROM registry.access.redhat.com/ubi10/ubi-minimal:latest@sha256:ab67cd02caf8706e34a695a1432ebe965934f6128ec352a6c3f4048b43a4fb5e
 WORKDIR /app
 ARG UV_HTTP_TIMEOUT=300
 ARG UV_HTTP_RETRIES=10
-COPY --from=ghcr.io/astral-sh/uv:latest@sha256:440fd6477af86a2f1b38080c539f1672cd22acb1b1a47e321dba5158ab08864d /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:latest@sha256:32a7bb39b496babbd997b0a39a4d66c126bdaf5661b302bf6f06abda8deca6ff /uv /uvx /bin/
 ENV UV_COMPILE_BYTECODE=0 UV_LINK_MODE=copy
 COPY backend/pyproject.toml backend/.python-version backend/uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv uv sync --no-dev --locked --no-install-project
