@@ -10,9 +10,9 @@
     "lint": "prettier --check . && markdownlint '**/*.md' --ignore node_modules"
   },
   "devDependencies": {
-    "markdownlint-cli": "^0.49.1",
-    "prettier": "^3.6.2",
-    "vitepress": "^1.6.4"
+    "markdownlint-cli": "0.49.1",
+    "prettier": "3.9.6",
+    "vitepress": "1.6.4"
   },
   "overrides": {
     "vite": "6.4.3"
