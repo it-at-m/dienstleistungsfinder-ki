@@ -13,7 +13,7 @@ maintainers = [
     { name = "Sebastian Berger", email = "sebastian.berger@muenchen.de" },
     { name = "Fabian Reinold", email = "fabian.reinold@muenchen.de" },
 ]
-requires-python = "==3.13.11"
+requires-python = "==3.14.9"
 dependencies = [
     "fastapi==0.162.0",
     "gitpython==3.2.1",
@@ -34,12 +34,7 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = [
-    "ipykernel==7.4.0",
-    "pre-commit==4.7.0",
-    "pytest==9.1.1",
-    "ruff==0.17.2",
-]
+dev = ["ipykernel==7.4.0", "pre-commit==4.7.0", "pytest==9.1.1", "ruff==0.17.2"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
