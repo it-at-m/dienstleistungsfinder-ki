@@ -79,7 +79,7 @@ Release-Workflows veröffentlichen außerdem `sha-<commit>`-Tags, Software Bills
 
 ### Ein Release erstellen
 
-Änderungen nach `main` mergen, die relevanten CI-Prüfungen abwarten und den lokalen Checkout mit `git switch main` und `git pull --ff-only` aktualisieren. Der Arbeitsbaum muss sauber sein und `HEAD` muss dem veröffentlichten `main`-Commit des gewählten Remotes entsprechen.
+Die Release-Änderungen nach `main` mergen und die relevanten CI-Prüfungen abwarten. Das Skript taggt immer den veröffentlichten `main`-Commit des gewählten Remotes, unabhängig vom ausgecheckten Branch und lokalen Änderungen. Nach der Bestätigung lädt es diesen Commit herunter, ohne den Checkout zu verändern. Falls sich `main` auf dem Remote während der Abfragen geändert hat, das Skript erneut ausführen und den aktualisierten Commit prüfen.
 
 Den interaktiven Helfer im Repository-Stamm ausführen (Python und Git müssen installiert sein):
 

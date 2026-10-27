@@ -79,7 +79,7 @@ Release workflows also publish `sha-<commit>` tags, software bills of materials,
 
 ### Create a release
 
-Merge the changes into `main`, wait for the relevant CI checks to pass, and update your local checkout with `git switch main` and `git pull --ff-only`. The working tree must be clean and `HEAD` must match the selected remote's published `main` commit.
+Merge the release changes into `main` and wait for the relevant CI checks to pass. The script always tags the selected remote's published `main` commit, regardless of your checked-out branch or local changes. After confirmation, it fetches that commit without changing your checkout. If remote `main` changed during the prompts, run the script again to review the updated commit.
 
 From the repository root, run the interactive helper (Python and Git must be installed):
 
