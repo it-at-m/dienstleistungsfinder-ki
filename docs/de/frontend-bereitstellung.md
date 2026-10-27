@@ -77,6 +77,42 @@ Core-CI prüft das Python-Backend, lintet und baut das Frontend und baut den kom
 
 Release-Workflows veröffentlichen außerdem `sha-<commit>`-Tags, Software Bills of Materials und Provenance-Attestierungen. Deployments sollten eine geprüfte semantische Version und einen unveränderlichen Digest statt `latest` festschreiben.
 
+### Ein Release erstellen
+
+Änderungen nach `main` mergen, die relevanten CI-Prüfungen abwarten und den lokalen Checkout mit `git switch main` und `git pull --ff-only` aktualisieren. Der Arbeitsbaum muss sauber sein und `HEAD` muss dem veröffentlichten `main`-Commit des gewählten Remotes entsprechen.
+
+Den interaktiven Helfer im Repository-Stamm ausführen (Python und Git müssen installiert sein):
+
+```bash
+python scripts/release.py
+```
+
+Das Skript fragt zuerst, ob **both** (beide Images), **core** oder **indexer** veröffentlicht werden sollen, und anschließend nach **patch**, **minor** oder **major**:
+
+- **Patch**: Fehlerkorrekturen, z. B. `1.2.3` → `1.2.4`.
+- **Minor**: abwärtskompatible Funktionen, z. B. `1.2.3` → `1.3.0`.
+- **Major**: inkompatible Änderungen, z. B. `1.2.3` → `2.0.0`.
+
+Die nächste Version wird für jede Komponente unabhängig anhand ihres höchsten stabilen Release-Tags auf dem Remote berechnet. Prerelease- und fremde Tags werden ignoriert; ohne stabilen Tag ist die Ausgangsversion `0.0.0`. Das Skript zeigt Commit, Tags und Image-Namen und fragt nach einer Bestätigung, bevor es annotierte Tags erstellt und gemeinsam atomar pusht. Nur die ausgewählten Tags werden gepusht. Lokale Tag-Kollisionen brechen das Release ab.
+
+Für eine Vorschau ohne Erstellen oder Pushen von Tags oder für einen anderen konfigurierten Remote:
+
+```bash
+python scripts/release.py --dry-run
+python scripts/release.py --remote upstream
+```
+
+Die Workflows **Release core image** und/oder **Release indexer image** in [GitHub Actions](https://github.com/it-at-m/Dienstleistungsfinder-KI/actions) verfolgen. Die Images stehen nach erfolgreichem Workflow-Abschluss zur Verfügung. Diese Workflows veröffentlichen Container-Images; sie erstellen keine GitHub-Release-Seite und ändern keine Paketversionsdateien. Bei einem fehlgeschlagenen Push behält das Skript lokale Tags und zeigt Befehle zur Wiederherstellung an; vor einem erneuten Versuch den Remote prüfen.
+
+Für ein manuelles Release den benötigten Tag erstellen und pushen, zum Beispiel:
+
+```bash
+git tag -a core-v1.0.1 -m "Release core-v1.0.1"
+git push origin refs/tags/core-v1.0.1:refs/tags/core-v1.0.1
+```
+
+Die Beispielversion durch die nächste unbenutzte Version ersetzen. Für ein Indexer-Release `indexer-vX.Y.Z` verwenden.
+
 ## Checkliste für Produktion
 
 1. Getrennte Qdrant-Zugangsdaten mit minimalen Rechten für Core und Indexer verwenden.

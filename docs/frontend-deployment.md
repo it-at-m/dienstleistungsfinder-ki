@@ -77,6 +77,42 @@ Core CI checks the Python backend, lints and builds the frontend, and builds the
 
 Release workflows also publish `sha-<commit>` tags, software bills of materials, and provenance attestations. Deployments should pin a reviewed semantic version and immutable digest rather than `latest`.
 
+### Create a release
+
+Merge the changes into `main`, wait for the relevant CI checks to pass, and update your local checkout with `git switch main` and `git pull --ff-only`. The working tree must be clean and `HEAD` must match the selected remote's published `main` commit.
+
+From the repository root, run the interactive helper (Python and Git must be installed):
+
+```bash
+python scripts/release.py
+```
+
+The script asks whether to release **both**, **core**, or **indexer**, then asks for a **patch**, **minor**, or **major** increment:
+
+- **Patch**: bug fixes, e.g. `1.2.3` → `1.2.4`.
+- **Minor**: backward-compatible features, e.g. `1.2.3` → `1.3.0`.
+- **Major**: breaking changes, e.g. `1.2.3` → `2.0.0`.
+
+Each component's next version is calculated independently from its highest stable release tag on the remote. Prerelease and unrelated tags are ignored; without a stable tag, the baseline is `0.0.0`. The script shows the commit, tags, and image names, then asks for confirmation before creating annotated tags and pushing them together in one atomic push. Only the selected tags are pushed. Local tag collisions stop the release.
+
+To preview without creating or pushing tags, or to select a different configured remote:
+
+```bash
+python scripts/release.py --dry-run
+python scripts/release.py --remote upstream
+```
+
+Follow **Release core image** and/or **Release indexer image** in [GitHub Actions](https://github.com/it-at-m/Dienstleistungsfinder-KI/actions). The images become available after those workflows succeed. These workflows publish container images; they do not create a GitHub Release page or update package version files. If a push fails, the script retains local tags and prints recovery commands; inspect the remote before retrying.
+
+For a manual release, create and push the required tag, for example:
+
+```bash
+git tag -a core-v1.0.1 -m "Release core-v1.0.1"
+git push origin refs/tags/core-v1.0.1:refs/tags/core-v1.0.1
+```
+
+Replace the example version with the next unused version. Use `indexer-vX.Y.Z` for an indexer release.
+
 ## Production checklist
 
 1. Use distinct least-privilege Qdrant credentials for the core and indexer.
