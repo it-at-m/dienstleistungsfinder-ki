@@ -13,7 +13,7 @@ maintainers = [
     { name = "Sebastian Berger", email = "sebastian.berger@muenchen.de" },
     { name = "Fabian Reinold", email = "fabian.reinold@muenchen.de" },
 ]
-requires-python = "==3.13.11"
+requires-python = "==3.14.9"
 dependencies = [
     "fastapi==0.162.0",
     "gitpython==3.2.1",
@@ -21,7 +21,7 @@ dependencies = [
     "langchain-openai==1.7.2",
     "langchain-qdrant==1.1.0",
     "langchain==1.4.7",
-    "langfuse==4.18.0",
+    "langfuse==5.0.4",
     "python-dotenv==1.2.4",
     "starlette==1.10.0",
     "qdrant-client[fastembed]==1.20.0",
@@ -30,7 +30,7 @@ dependencies = [
     "pyyaml==6.0.3",
     "aiosmtplib==5.1.3",
     "cohere==7.3.0",
-    "fastmcp>=4.0.3",
+    "fastmcp>=4.1.4",
 ]
 
 [dependency-groups]

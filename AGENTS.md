@@ -23,7 +23,7 @@ cd indexer && uv sync --locked && uv run ruff check . && uv run pytest
 
 ## Toolchain
 
-- Python is pinned exactly to 3.13.11 (`requires-python = "==3.13.11"`, `.python-version`). Use `uv` and `uv sync --locked`.
+- Python is pinned exactly to 3.14.9 (`requires-python = "==3.14.9"`, `.python-version`). Use `uv` and `uv sync --locked`.
 - Node 24 is required (`engines.node = "=24.x"`); npm for frontend and docs.
 - All dependency versions are exactly pinned (`==` in pyproject, exact npm versions). Renovate opens update PRs — do not loosen ranges or hand-edit lockfiles.
 
