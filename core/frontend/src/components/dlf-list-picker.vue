@@ -14,7 +14,7 @@ const emit = defineEmits<{
   (event: "item-removed", value: string): void;
 }>();
 
-const selectedItems = defineModel<string[]>({ default: [] });
+const selectedItems = defineModel<string[]>({ default: () => [] });
 
 const draft = ref<string>("");
 const isAdding = ref<boolean>(false);
