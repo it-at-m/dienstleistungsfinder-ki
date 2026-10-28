@@ -77,6 +77,48 @@ Core-CI prüft das Python-Backend, lintet und baut das Frontend und baut den kom
 
 Release-Workflows veröffentlichen außerdem `sha-<commit>`-Tags, Software Bills of Materials und Provenance-Attestierungen. Deployments sollten eine geprüfte semantische Version und einen unveränderlichen Digest statt `latest` festschreiben.
 
+### Ein Release erstellen
+
+Die Release-Änderungen nach `main` mergen und die relevanten CI-Prüfungen abwarten. Das Skript taggt immer den veröffentlichten `main`-Commit des gewählten Remotes, unabhängig vom ausgecheckten Branch und lokalen Änderungen. Nach der Bestätigung lädt es diesen Commit herunter, ohne den Checkout zu verändern. Falls sich `main` auf dem Remote während der Abfragen geändert hat, das Skript erneut ausführen und den aktualisierten Commit prüfen.
+
+Der lokale Helfer benötigt nur Python, Git und die bestehende Git-Anmeldung mit Berechtigung zum Pushen von Tags. Weder GitHub CLI noch Personal Access Token sind erforderlich. Vor dem ersten gebündelten Release `.github/workflows/release-project.yml` und das aktualisierte Skript nach `main` mergen. Das lokale Skript pusht Tags; GitHub Actions veröffentlicht anschließend das Release mit dem automatisch bereitgestellten `GITHUB_TOKEN` und den Berechtigungen `contents: write` und `actions: read`.
+
+Den interaktiven Helfer im Repository-Stamm ausführen:
+
+```bash
+python scripts/release.py
+```
+
+Das Skript fragt zuerst, ob **both** (beide Images), **core** oder **indexer** neu gebaut werden sollen, und anschließend nach **patch**, **minor** oder **major** für das Projekt-Release und die ausgewählten Komponenten:
+
+- **Patch**: Fehlerkorrekturen, z. B. `1.2.3` → `1.2.4`.
+- **Minor**: abwärtskompatible Funktionen, z. B. `1.2.3` → `1.3.0`.
+- **Major**: inkompatible Änderungen, z. B. `1.2.3` → `2.0.0`.
+
+Die Komponentenversionen werden unabhängig anhand der höchsten stabilen Tags `core-vX.Y.Z` und `indexer-vX.Y.Z` auf dem Remote berechnet. Das Projekt erhält eine eigene Version `vX.Y.Z`, die anhand stabiler Projekt-Tags berechnet wird. Prerelease- und fremde Tags werden ignoriert; ohne stabilen Tag ist die Ausgangsversion `0.0.0`. Wird nur eine Komponente neu gebaut, wird die höchste stabile Image-Version der anderen Komponente wiederverwendet. Dafür muss bereits ein Release dieser Komponente existieren; andernfalls beide Images auswählen.
+
+Das Skript zeigt Commit, Projektversion, Komponenten-Tags und Image-Namen und fragt nach einer Bestätigung. Es erstellt annotierte Tags für die ausgewählten Komponenten und das Projekt und pusht sie gemeinsam atomar. Fremde Tags werden nicht gepusht. Lokale Tag-Kollisionen brechen das Release ab. Die Annotation des Projekt-Tags speichert die Bundle-Metadaten zur Wiederaufnahme.
+
+Für eine Vorschau ohne Erstellen oder Pushen von Tags oder für einen anderen konfigurierten Remote:
+
+```bash
+python scripts/release.py --dry-run
+python scripts/release.py --remote upstream
+```
+
+Nach dem Pushen der Tags gibt das lokale Skript den Link zu [GitHub Actions](https://github.com/it-at-m/Dienstleistungsfinder-KI/actions) aus und beendet sich. Der Projekt-Tag startet **Release project**. Dieser Workflow wartet auf **Release core image** und **Release indexer image** und gleicht dabei den genauen Tag und Quell-Commit jedes Images ab. Auch der ursprüngliche Build eines wiederverwendeten Images wird geprüft. Sobald beide Builds erfolgreich sind, erstellt er ein GitHub Release namens **Dienstleistungsfinder KI vX.Y.Z**, listet beide Image-Versionen samt Build-Links auf und hängt `release.json` mit den Versionen und Quell-Commits des Bundles an. Die Pakete bleiben in GHCR getrennt; das Projekt-Release fasst sie zu einem dokumentierten Bundle zusammen. Paketversionsdateien werden nicht geändert.
+
+Der Projekt-Workflow wartet bis zu eine Stunde auf Image-Builds. Schlägt ein Image-Workflow fehl, diesen über die GitHub-Actions-Weboberfläche erneut ausführen und den erfolgreichen Abschluss abwarten. Anschließend **Release project** für denselben Projekt-Tag erneut ausführen. Dessen Annotation bewahrt das genaue Bundle, sodass weder eine neue Versionserhöhung noch neue Tags nötig sind. Das GitHub Release wird zunächst als Entwurf erstellt, dann wird das Manifest hochgeladen und erst anschließend veröffentlicht. Ein erneuter Workflow-Lauf kann einen vorhandenen Entwurf fertigstellen und erkennt ein bereits veröffentlichtes Release. Bei einem fehlgeschlagenen lokalen Push bleiben Tags erhalten und Befehle zur Wiederherstellung werden ausgegeben; vor einem erneuten Versuch den Remote prüfen.
+
+Um manuell nur ein Komponenten-Image zu veröffentlichen, dessen Tag erstellen und pushen, zum Beispiel:
+
+```bash
+git tag -a core-v1.0.1 -m "Release core-v1.0.1"
+git push origin refs/tags/core-v1.0.1:refs/tags/core-v1.0.1
+```
+
+Die Beispielversion durch die nächste unbenutzte Version ersetzen. Für ein Indexer-Release `indexer-vX.Y.Z` verwenden. Manuelle Komponenten-Tags starten Image-Builds, erstellen aber kein gebündeltes GitHub Release.
+
 ## Checkliste für Produktion
 
 1. Getrennte Qdrant-Zugangsdaten mit minimalen Rechten für Core und Indexer verwenden.
