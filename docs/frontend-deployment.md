@@ -81,19 +81,23 @@ Release workflows also publish `sha-<commit>` tags, software bills of materials,
 
 Merge the release changes into `main` and wait for the relevant CI checks to pass. The script always tags the selected remote's published `main` commit, regardless of your checked-out branch or local changes. After confirmation, it fetches that commit without changing your checkout. If remote `main` changed during the prompts, run the script again to review the updated commit.
 
-From the repository root, run the interactive helper (Python and Git must be installed):
+The local helper requires only Python, Git, and your existing Git login with permission to push tags. No GitHub CLI or personal access token is required. Merge `.github/workflows/release-project.yml` and the updated script into `main` before the first bundled release. The local script pushes tags; GitHub Actions then publishes the release using its automatically provided `GITHUB_TOKEN` with `contents: write` and `actions: read` permissions.
+
+From the repository root, run the interactive helper:
 
 ```bash
 python scripts/release.py
 ```
 
-The script asks whether to release **both**, **core**, or **indexer**, then asks for a **patch**, **minor**, or **major** increment:
+The script asks whether to rebuild **both**, **core**, or **indexer**, then asks for a **patch**, **minor**, or **major** increment for the project release and selected components:
 
 - **Patch**: bug fixes, e.g. `1.2.3` → `1.2.4`.
 - **Minor**: backward-compatible features, e.g. `1.2.3` → `1.3.0`.
 - **Major**: breaking changes, e.g. `1.2.3` → `2.0.0`.
 
-Each component's next version is calculated independently from its highest stable release tag on the remote. Prerelease and unrelated tags are ignored; without a stable tag, the baseline is `0.0.0`. The script shows the commit, tags, and image names, then asks for confirmation before creating annotated tags and pushing them together in one atomic push. Only the selected tags are pushed. Local tag collisions stop the release.
+Component versions are calculated independently from the highest stable `core-vX.Y.Z` and `indexer-vX.Y.Z` tags on the remote. The project gets its own `vX.Y.Z` version, calculated from stable project tags. Prerelease and unrelated tags are ignored; without a stable tag, the baseline is `0.0.0`. If you rebuild only one component, the other component's highest stable image version is reused. An existing release of that component is required; otherwise, select both images.
+
+The script shows the commit, project version, component tags, and image names, then asks for confirmation. It creates annotated tags for the selected components and the project and pushes them together atomically. Unrelated tags are not pushed. Local tag collisions stop the release. The project tag annotation stores the bundle metadata for recovery.
 
 To preview without creating or pushing tags, or to select a different configured remote:
 
@@ -102,16 +106,18 @@ python scripts/release.py --dry-run
 python scripts/release.py --remote upstream
 ```
 
-Follow **Release core image** and/or **Release indexer image** in [GitHub Actions](https://github.com/it-at-m/Dienstleistungsfinder-KI/actions). The images become available after those workflows succeed. These workflows publish container images; they do not create a GitHub Release page or update package version files. If a push fails, the script retains local tags and prints recovery commands; inspect the remote before retrying.
+After pushing the tags, the local script prints the [GitHub Actions](https://github.com/it-at-m/Dienstleistungsfinder-KI/actions) link and exits. The project tag starts **Release project**, which waits for **Release core image** and **Release indexer image**, matching each image's exact tag and source commit. It also checks the original build of a reused image. Once both builds have succeeded, it creates one GitHub Release named **Dienstleistungsfinder KI vX.Y.Z**, lists both image versions and build links, and attaches `release.json` containing the bundle's versions and source commits. The packages remain separate in GHCR; the project release groups them into one documented bundle. Package version files are not changed.
 
-For a manual release, create and push the required tag, for example:
+The project workflow waits up to one hour for image builds. If an image workflow fails, rerun it in the GitHub Actions web interface and wait for success, then rerun **Release project** for the same project tag. Its annotation preserves the exact bundle, so no new version increment or tags are needed. The GitHub Release is created as a draft, the manifest is uploaded, and only then is it published. Rerunning the workflow can finish an existing draft and recognizes an already published release. If a local push fails, tags are retained and recovery commands are printed; inspect the remote before retrying.
+
+To publish only a component image manually, create and push its tag, for example:
 
 ```bash
 git tag -a core-v1.0.1 -m "Release core-v1.0.1"
 git push origin refs/tags/core-v1.0.1:refs/tags/core-v1.0.1
 ```
 
-Replace the example version with the next unused version. Use `indexer-vX.Y.Z` for an indexer release.
+Replace the example version with the next unused version. Use `indexer-vX.Y.Z` for an indexer release. Manual component tags trigger image builds but do not create a bundled GitHub Release.
 
 ## Production checklist
 
